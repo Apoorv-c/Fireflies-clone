@@ -35,6 +35,7 @@ function SearchContent() {
           placeholder="Search across all meeting transcripts..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          suppressHydrationWarning
           className="w-full pl-12 pr-4 py-3 bg-[#16213e] border border-[#2a2a4a] rounded-xl text-[#e0e0e0] placeholder-[#6b6b8a] text-base focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50 focus:border-[#6C5CE7] transition-all"
           autoFocus
         />

@@ -122,6 +122,7 @@ export default function ActionItemsPanel({ meetingId }: ActionItemsPanelProps) {
             value={newDescription}
             onChange={(e) => setNewDescription(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+            suppressHydrationWarning
             className="flex-1 px-3 py-2 bg-[#2a2a4a] border border-[#3a3a5a] rounded-lg text-sm text-[#e0e0e0] placeholder-[#6b6b8a] focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50"
           />
           <input
@@ -129,6 +130,7 @@ export default function ActionItemsPanel({ meetingId }: ActionItemsPanelProps) {
             placeholder="Assignee"
             value={newAssignee}
             onChange={(e) => setNewAssignee(e.target.value)}
+            suppressHydrationWarning
             className="w-28 px-3 py-2 bg-[#2a2a4a] border border-[#3a3a5a] rounded-lg text-sm text-[#e0e0e0] placeholder-[#6b6b8a] focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50"
           />
           <button

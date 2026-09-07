@@ -30,7 +30,7 @@ export default function MeetingFilters({
   participant, onParticipantChange,
 }: MeetingFiltersProps) {
   return (
-    <div className="flex flex-wrap items-center gap-3 mb-6">
+    <div className="flex flex-wrap items-center gap-3 mb-6" suppressHydrationWarning>
       {/* Search */}
       <div className="relative flex-1 min-w-[200px]">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6b6b8a]" />
@@ -39,6 +39,7 @@ export default function MeetingFilters({
           placeholder="Filter meetings..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
+          suppressHydrationWarning
           className="w-full pl-9 pr-4 py-2 bg-[#2a2a4a] border border-[#3a3a5a] rounded-lg text-sm text-[#e0e0e0] placeholder-[#6b6b8a] focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50 focus:border-[#6C5CE7] transition-all"
         />
       </div>
@@ -51,6 +52,7 @@ export default function MeetingFilters({
           placeholder="Participant..."
           value={participant}
           onChange={(e) => onParticipantChange(e.target.value)}
+          suppressHydrationWarning
           className="w-full pl-9 pr-4 py-2 bg-[#2a2a4a] border border-[#3a3a5a] rounded-lg text-sm text-[#e0e0e0] placeholder-[#6b6b8a] focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50 focus:border-[#6C5CE7] transition-all"
         />
       </div>
@@ -60,6 +62,7 @@ export default function MeetingFilters({
         type="date"
         value={dateFrom}
         onChange={(e) => onDateFromChange(e.target.value)}
+        suppressHydrationWarning
         className="px-3 py-2 bg-[#2a2a4a] border border-[#3a3a5a] rounded-lg text-sm text-[#e0e0e0] focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50 focus:border-[#6C5CE7] transition-all [color-scheme:dark]"
         placeholder="From"
       />
@@ -69,6 +72,7 @@ export default function MeetingFilters({
         type="date"
         value={dateTo}
         onChange={(e) => onDateToChange(e.target.value)}
+        suppressHydrationWarning
         className="px-3 py-2 bg-[#2a2a4a] border border-[#3a3a5a] rounded-lg text-sm text-[#e0e0e0] focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50 focus:border-[#6C5CE7] transition-all [color-scheme:dark]"
         placeholder="To"
       />
@@ -79,6 +83,7 @@ export default function MeetingFilters({
         <select
           value={sortBy}
           onChange={(e) => onSortChange(e.target.value)}
+          suppressHydrationWarning
           className="px-3 py-2 bg-[#2a2a4a] border border-[#3a3a5a] rounded-lg text-sm text-[#e0e0e0] focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50 focus:border-[#6C5CE7] transition-all appearance-none cursor-pointer pr-8"
         >
           {sortOptions.map((opt) => (
