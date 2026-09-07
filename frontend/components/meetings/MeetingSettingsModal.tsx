@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Modal from '@/components/ui/Modal';
-import { Sparkles, Mail, Lock, Globe, ChevronDown } from 'lucide-react';
+import { Mail, Lock, Globe, ChevronDown } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
 
 interface MeetingSettingsModalProps {
@@ -13,7 +13,6 @@ interface MeetingSettingsModalProps {
 export default function MeetingSettingsModal({ isOpen, onClose }: MeetingSettingsModalProps) {
   const { showToast } = useToast();
 
-  const [unlimitedTranscripts, setUnlimitedTranscripts] = useState(false);
   const [autoJoin, setAutoJoin] = useState(true);
   const [autoJoinOption, setAutoJoinOption] = useState('All meetings with web-conf link');
   const [emailRecapOption, setEmailRecapOption] = useState('Everyone on the invite');
@@ -28,42 +27,6 @@ export default function MeetingSettingsModal({ isOpen, onClose }: MeetingSetting
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Meeting Settings" maxWidth="max-w-md">
       <div className="space-y-4 py-1" suppressHydrationWarning>
-        {/* 1. Green card: Get unlimited transcripts */}
-        <div className="border border-emerald-500 rounded-xl p-3.5 flex items-center justify-between bg-white shadow-2xs">
-          <div className="flex items-center gap-2.5">
-            <Sparkles size={18} className="text-emerald-500 flex-shrink-0" />
-            <span className="text-sm font-medium text-slate-800">
-              Get unlimited transcripts
-            </span>
-            <span className="bg-sky-50 text-sky-500 border border-sky-100 text-[10px] font-bold px-1.5 py-0.5 rounded tracking-wide uppercase">
-              FREE
-            </span>
-          </div>
-
-          {/* Toggle Switch */}
-          <button
-            type="button"
-            role="switch"
-            aria-checked={unlimitedTranscripts}
-            onClick={() => setUnlimitedTranscripts(!unlimitedTranscripts)}
-            suppressHydrationWarning
-            style={{
-              backgroundColor: unlimitedTranscripts ? '#6C5CE7' : '#d8d4f8',
-              width: '42px',
-              height: '24px',
-            }}
-            className="relative shrink-0 rounded-full transition-colors cursor-pointer p-0.5 flex items-center"
-          >
-            <span
-              style={{
-                transform: unlimitedTranscripts ? 'translateX(18px)' : 'translateX(2px)',
-                width: '18px',
-                height: '18px',
-              }}
-              className="inline-block rounded-full bg-white shadow-sm transition-transform"
-            />
-          </button>
-        </div>
 
         {/* 2. Auto-join calendar meetings */}
         <div className="space-y-2">
