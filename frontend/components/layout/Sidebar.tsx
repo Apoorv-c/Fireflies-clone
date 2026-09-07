@@ -117,13 +117,13 @@ export default function Sidebar() {
             href="/settings"
             title="Settings"
             suppressHydrationWarning
-            className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors group relative ${
-              pathname === '/settings'
-                ? 'bg-slate-100 text-[#6C5CE7]'
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all group relative ${
+              pathname.startsWith('/settings')
+                ? 'bg-[#f0edfd] text-[#6C5CE7] shadow-xs'
                 : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
             }`}
           >
-            <Settings size={17} strokeWidth={1.75} />
+            <Settings size={18} strokeWidth={pathname.startsWith('/settings') ? 2.2 : 1.75} />
             <span className="absolute left-[54px] px-2 py-1 bg-slate-900 text-white text-[11px] font-medium rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 z-50 shadow-md">
               Settings
             </span>
