@@ -53,9 +53,9 @@ export default function MeetingCard({ meeting }: MeetingCardProps) {
           </div>
 
           {/* Date & Time */}
-          <div className="flex items-center gap-2 mb-3 text-slate-500 text-xs">
+          <div className="flex items-center gap-2 mb-3 text-slate-500 text-xs" suppressHydrationWarning>
             <Calendar size={12} className="text-[#6C5CE7]" />
-            <span>{formatDate(meeting.date)} at {formatTime(meeting.date)}</span>
+            <span suppressHydrationWarning>{formatDate(meeting.date)} at {formatTime(meeting.date)}</span>
           </div>
 
           {/* Summary Preview */}

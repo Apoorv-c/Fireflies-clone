@@ -183,7 +183,7 @@ export default function HomePage() {
                     <h3 className="text-xs font-semibold text-slate-800 group-hover:text-[#6C5CE7] transition-colors truncate">
                       {m.title}
                     </h3>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
+                    <p className="text-[11px] text-slate-500 mt-0.5" suppressHydrationWarning>
                       {formatMeetingDate(m.date)}
                     </p>
                   </div>

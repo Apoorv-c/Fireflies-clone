@@ -202,9 +202,9 @@ export default function MeetingDetailPage() {
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2 tracking-tight">{meeting.title}</h1>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500">
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1.5" suppressHydrationWarning>
               <Calendar size={13} className="text-[#6C5CE7]" />
-              {formatDate(meeting.date)} at {formatTime(meeting.date)}
+              <span suppressHydrationWarning>{formatDate(meeting.date)} at {formatTime(meeting.date)}</span>
             </span>
             <span className="flex items-center gap-1.5">
               <Clock size={13} className="text-[#6C5CE7]" />

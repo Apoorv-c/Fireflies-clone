@@ -42,18 +42,19 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="fixed left-0 top-0 h-screen w-[56px] bg-white border-r border-slate-200/80 flex flex-col items-center py-3 z-50 select-none shadow-[1px_0_4px_rgba(0,0,0,0.02)]">
+      <aside suppressHydrationWarning className="fixed left-0 top-0 h-screen w-[56px] bg-white border-r border-slate-200/80 flex flex-col items-center py-3 z-50 select-none shadow-[1px_0_4px_rgba(0,0,0,0.02)]">
         {/* Workspace Brand Avatar */}
         <Link
           href="/"
           title="Workspace Home"
+          suppressHydrationWarning
           className="w-8 h-8 rounded-lg bg-[#6C5CE7] hover:bg-[#5a4bd6] flex items-center justify-center text-white font-bold text-sm shadow-sm transition-all mb-4"
         >
           A
         </Link>
 
         {/* Top Navigation Icons */}
-        <nav className="flex-1 w-full flex flex-col items-center gap-1.5 px-2">
+        <nav suppressHydrationWarning className="flex-1 w-full flex flex-col items-center gap-1.5 px-2">
           {mainNavItems.map((item) => {
             const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
             const Icon = item.icon;
@@ -63,6 +64,7 @@ export default function Sidebar() {
                 key={item.label}
                 href={item.href}
                 title={item.label}
+                suppressHydrationWarning
                 className={`relative w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-150 group
                   ${isActive
                     ? 'bg-slate-100 text-[#6C5CE7] font-semibold shadow-xs'
@@ -85,12 +87,13 @@ export default function Sidebar() {
         </nav>
 
         {/* Bottom Actions */}
-        <div className="w-full flex flex-col items-center gap-1.5 px-2 pt-2 border-t border-slate-100">
+        <div suppressHydrationWarning className="w-full flex flex-col items-center gap-1.5 px-2 pt-2 border-t border-slate-100">
           <button
             type="button"
             title="Invite Teammates"
+            suppressHydrationWarning
             onClick={() => setIsCreateModalOpen(true)}
-            className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors group relative"
+            className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors group relative cursor-pointer"
           >
             <UserPlus size={17} strokeWidth={1.75} />
             <span className="absolute left-[54px] px-2 py-1 bg-slate-900 text-white text-[11px] font-medium rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 z-50 shadow-md">
@@ -101,6 +104,7 @@ export default function Sidebar() {
           <Link
             href="/settings"
             title="Workspaces"
+            suppressHydrationWarning
             className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors group relative"
           >
             <FolderTree size={17} strokeWidth={1.75} />
@@ -112,6 +116,7 @@ export default function Sidebar() {
           <Link
             href="/settings"
             title="Settings"
+            suppressHydrationWarning
             className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors group relative ${
               pathname === '/settings'
                 ? 'bg-slate-100 text-[#6C5CE7]'
