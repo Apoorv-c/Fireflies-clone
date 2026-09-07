@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --sidebar-bg: #1a1a2e;
+  --content-bg: #0f0f23;
+  --card-bg: #16213e;
+  --card-hover: #1a1a3e;
+  --accent: #6C5CE7;
+  --accent-light: #a29bfe;
+  --text-primary: #e0e0e0;
+  --text-secondary: #8b8ba3;
+  --border: #2a2a4a;
+}
+
+body {
+  background-color: var(--content-bg);
+  color: var(--text-primary);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--content-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Toast animation */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+/* Active segment highlight */
+@keyframes segment-glow {
+  0% { background-color: rgba(108, 92, 231, 0.05); }
+  50% { background-color: rgba(108, 92, 231, 0.12); }
+  100% { background-color: rgba(108, 92, 231, 0.08); }
+}
+
+.segment-active {
+  animation: segment-glow 1s ease-in-out;
+  background-color: rgba(108, 92, 231, 0.08);
+}
