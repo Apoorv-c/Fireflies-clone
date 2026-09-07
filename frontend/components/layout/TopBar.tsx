@@ -107,7 +107,7 @@ export default function TopBar() {
           </h1>
         </div>
 
-        {/* Center: Search Box with Ctrl + K */}
+        {/* Center: Search Box */}
         <form onSubmit={handleSearch} className="flex-1 max-w-lg mx-1.5 sm:mx-4">
           <div className="relative">
             <Search size={15} className="absolute left-3 sm:left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -117,31 +117,13 @@ export default function TopBar() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               suppressHydrationWarning
-              className="w-full pl-8 sm:pl-9 pr-3 sm:pr-16 py-1.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/30 focus:border-[#6C5CE7] transition-all"
+              className="w-full pl-8 sm:pl-9 pr-3 sm:pr-4 py-1.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/30 focus:border-[#6C5CE7] transition-all"
             />
-            <kbd className="hidden sm:block absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 bg-white border border-slate-200 rounded shadow-2xs pointer-events-none">
-              Ctrl + K
-            </kbd>
           </div>
         </form>
 
-        {/* Right Actions: Free Meetings badge, Notifications Bell & Capture */}
+        {/* Right Actions: Notifications Bell & Capture */}
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-          {/* Free Meetings Pill / Pro Active badge */}
-          <button
-            type="button"
-            onClick={() => router.push('/plan')}
-            title="View Plans & Upgrade"
-            className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-slate-200/80 hover:border-slate-300 hover:bg-slate-50 transition-all cursor-pointer"
-          >
-            <span className={`text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-none ${isPremium ? 'bg-[#6C5CE7]' : 'bg-[#10B981]'}`}>
-              {isPremium ? 'PRO' : '3'}
-            </span>
-            <span className="text-slate-600 text-xs font-medium">
-              {isPremium ? 'Business Active' : 'Free meetings'}
-            </span>
-          </button>
-
           {/* Notification Bell with Working Dropdown */}
           <div className="relative" ref={notifRef}>
             <button

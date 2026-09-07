@@ -204,10 +204,6 @@ export default function HelpSupportModal({ isOpen, onClose }: HelpSupportModalPr
 
               <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 overflow-hidden bg-white">
                 <div className="flex items-center justify-between p-3 text-xs">
-                  <span className="text-slate-700">Quick Search across notebook & tasks</span>
-                  <kbd className="px-2 py-1 bg-slate-100 border border-slate-200 rounded text-[11px] font-mono text-slate-600 font-semibold">Ctrl + K</kbd>
-                </div>
-                <div className="flex items-center justify-between p-3 text-xs">
                   <span className="text-slate-700">Play / Pause meeting audio</span>
                   <kbd className="px-2 py-1 bg-slate-100 border border-slate-200 rounded text-[11px] font-mono text-slate-600 font-semibold">Space</kbd>
                 </div>

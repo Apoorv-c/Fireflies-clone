@@ -347,17 +347,7 @@ export default function IntegrationsPage() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const moreDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Keyboard shortcut Ctrl+K / Cmd+K to focus search input
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -416,7 +406,7 @@ export default function IntegrationsPage() {
 
   return (
     <div className="max-w-5xl mx-auto py-4 px-2 sm:px-4 space-y-6" suppressHydrationWarning>
-      {/* Top Search Bar with Ctrl+K shortcut */}
+      {/* Top Search Bar */}
       <div className="max-w-xl mx-auto">
         <div className="relative flex items-center">
           <Search size={16} className="absolute left-3.5 text-slate-400 pointer-events-none" />
@@ -426,13 +416,8 @@ export default function IntegrationsPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by title or keyword"
-            className="w-full pl-10 pr-20 py-2.5 bg-white border border-slate-200/90 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/20 focus:border-[#6C5CE7] transition-all shadow-xs"
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200/90 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/20 focus:border-[#6C5CE7] transition-all shadow-xs"
           />
-          <div className="absolute right-3 flex items-center">
-            <kbd className="px-2 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-100 border border-slate-200 rounded-md select-none">
-              Ctrl + K
-            </kbd>
-          </div>
         </div>
       </div>
 
