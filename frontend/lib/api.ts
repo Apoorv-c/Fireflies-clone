@@ -80,6 +80,20 @@ export const generateSummary = async (meetingId: number): Promise<Summary> => {
 };
 
 // Action Items
+export const getAllActionItems = async (): Promise<ActionItem[]> => {
+  const { data } = await api.get('/api/action-items');
+  return data;
+};
+
+export const createStandaloneActionItem = async (itemData: {
+  description: string;
+  assignee?: string;
+  due_date?: string;
+}): Promise<ActionItem> => {
+  const { data } = await api.post('/api/action-items', itemData);
+  return data;
+};
+
 export const getActionItems = async (meetingId: number): Promise<ActionItem[]> => {
   const { data } = await api.get(`/api/meetings/${meetingId}/action-items`);
   return data;

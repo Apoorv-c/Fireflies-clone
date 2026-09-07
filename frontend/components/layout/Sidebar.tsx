@@ -45,14 +45,35 @@ function IntegrationsStackIcon({ size = 18, strokeWidth = 1.75, className }: { s
   );
 }
 
+function TasksIcon({ size = 18, strokeWidth = 2, className }: { size?: number; strokeWidth?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <line x1="4" y1="6" x2="18" y2="6" />
+      <line x1="4" y1="12" x2="18" y2="12" />
+      <line x1="4" y1="18" x2="12" y2="18" />
+      <polyline points="15 17 18 20 23 14" />
+    </svg>
+  );
+}
+
 const mainNavItems: NavDockItem[] = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/meetings', label: 'Meetings', icon: Video },
+  { href: '/tasks', label: 'Tasks', icon: TasksIcon },
   { href: '/search', label: 'Transcripts & Search', icon: AlignLeft },
   { href: '/meetings/1', label: 'Fred AI Assistant', icon: Bot },
-  { href: '/meetings', label: 'AI Summaries', icon: Sparkles },
-  { href: '/meetings', label: 'Analytics', icon: BarChart2 },
   { href: '/integrations', label: 'Integrations', icon: IntegrationsStackIcon },
+  { href: '/meetings', label: 'Analytics', icon: BarChart2 },
   { href: '/meetings', label: 'Live Capture', icon: Zap, hasDot: true },
 ];
 

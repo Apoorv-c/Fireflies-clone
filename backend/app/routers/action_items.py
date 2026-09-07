@@ -7,6 +7,26 @@ from app.schemas.action_item import ActionItemCreate, ActionItemUpdate, ActionIt
 
 router = APIRouter(tags=["Action Items"])
 
+@router.get("/action-items", response_model=List[ActionItemResponse])
+def get_all_action_items(db: Session = Depends(get_db)):
+    items = db.query(ActionItem).order_by(ActionItem.created_at.desc()).all()
+    return items
+
+@router.post("/action-items", response_model=ActionItemResponse)
+def create_standalone_action_item(item: ActionItemCreate, db: Session = Depends(get_db)):
+    m = db.query(Meeting).first()
+    meeting_id = m.id if m else 1
+    new_item = ActionItem(
+        meeting_id=meeting_id,
+        description=item.description,
+        assignee=item.assignee,
+        due_date=item.due_date
+    )
+    db.add(new_item)
+    db.commit()
+    db.refresh(new_item)
+    return new_item
+
 @router.get("/meetings/{meeting_id}/action-items", response_model=List[ActionItemResponse])
 def get_action_items(meeting_id: int, db: Session = Depends(get_db)):
     items = db.query(ActionItem).filter(ActionItem.meeting_id == meeting_id).all()
