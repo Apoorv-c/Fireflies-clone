@@ -16,10 +16,18 @@ interface UIState {
   transcriptSearchQuery: string;
   sidebarOpen: boolean;
   isCreateModalOpen: boolean;
+  isLiveCaptureOpen: boolean;
+  isUpgradeModalOpen: boolean;
+  upgradeModalFeature: string;
+  isPremium: boolean;
   setSearchQuery: (query: string) => void;
   setTranscriptSearchQuery: (query: string) => void;
   setSidebarOpen: (open: boolean) => void;
   setIsCreateModalOpen: (open: boolean) => void;
+  setIsLiveCaptureOpen: (open: boolean) => void;
+  setIsUpgradeModalOpen: (open: boolean) => void;
+  setUpgradeModalFeature: (feature: string) => void;
+  setIsPremium: (premium: boolean) => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set) => ({
@@ -38,8 +46,16 @@ export const useUIStore = create<UIState>((set) => ({
   transcriptSearchQuery: '',
   sidebarOpen: true,
   isCreateModalOpen: false,
+  isLiveCaptureOpen: false,
+  isUpgradeModalOpen: false,
+  upgradeModalFeature: 'Live Capture',
+  isPremium: false,
   setSearchQuery: (query) => set({ searchQuery: query }),
   setTranscriptSearchQuery: (query) => set({ transcriptSearchQuery: query }),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
   setIsCreateModalOpen: (open) => set({ isCreateModalOpen: open }),
+  setIsLiveCaptureOpen: (open) => set({ isLiveCaptureOpen: open }),
+  setIsUpgradeModalOpen: (open) => set({ isUpgradeModalOpen: open }),
+  setUpgradeModalFeature: (feature) => set({ upgradeModalFeature: feature }),
+  setIsPremium: (premium) => set({ isPremium: premium }),
 }));

@@ -43,6 +43,7 @@ import {
   Info
 } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
+import { useUIStore } from '@/lib/store';
 
 // Fireflies Pro Crown Logo Component matching user uploaded media_1788807905606.png
 function ProCrownBadge({ onClick, className = '' }: { onClick?: () => void; className?: string }) {
@@ -100,8 +101,8 @@ export default function SettingsPage() {
   >('recording');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Premium / Pro Plan State
-  const [isPremium, setIsPremium] = useState(false);
+  // Premium / Pro Plan State (Global Store)
+  const { isPremium, setIsPremium } = useUIStore();
   const [proFeatureContext, setProFeatureContext] = useState<{ title: string; desc: string }>({
     title: 'Unlock Pro Features',
     desc: 'Unlock meeting video recording, custom notetaker name, and automated retention policies.',

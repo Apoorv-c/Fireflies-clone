@@ -56,9 +56,30 @@ const mainNavItems: NavDockItem[] = [
   { href: '/meetings', label: 'Live Capture', icon: Zap, hasDot: true },
 ];
 
+function ProCrownBadge({ className = "w-2.5 h-2.5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 13 11" fill="none" className={className}>
+      <path
+        d="M1 9.5H12M1.5 7.5L1 2L4.5 4.8L6.5 1.5L8.5 4.8L12 2L11.5 7.5H1.5Z"
+        fill="#6C5CE7"
+        stroke="#6C5CE7"
+        strokeWidth="0.8"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function Sidebar() {
   const pathname = usePathname();
-  const { isCreateModalOpen, setIsCreateModalOpen } = useUIStore();
+  const {
+    isCreateModalOpen,
+    setIsCreateModalOpen,
+    isPremium,
+    setIsUpgradeModalOpen,
+    setUpgradeModalFeature,
+    setIsLiveCaptureOpen,
+  } = useUIStore();
 
   return (
     <>
@@ -78,6 +99,42 @@ export default function Sidebar() {
           {mainNavItems.map((item) => {
             const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
             const Icon = item.icon;
+
+            if (item.label === 'Live Capture') {
+              return (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => {
+                    if (!isPremium) {
+                      setUpgradeModalFeature('Live Capture');
+                      setIsUpgradeModalOpen(true);
+                    } else {
+                      setIsLiveCaptureOpen(true);
+                    }
+                  }}
+                  title={!isPremium ? 'Live Capture 👑 (Pro Plan)' : 'Live Capture (Ready)'}
+                  suppressHydrationWarning
+                  className={`relative w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-150 group cursor-pointer ${
+                    !isPremium
+                      ? 'text-slate-500 hover:text-[#6C5CE7] hover:bg-[#f4f0fd]'
+                      : 'text-[#6C5CE7] bg-purple-50 hover:bg-purple-100 shadow-xs'
+                  }`}
+                >
+                  <Icon size={18} strokeWidth={1.75} />
+
+                  {/* Pro Crown Badge indicator */}
+                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#f4f0fd] border border-[#6C5CE7]/30 flex items-center justify-center shadow-2xs">
+                    <ProCrownBadge className="w-2 h-2" />
+                  </span>
+
+                  {/* Subtle Hover Tooltip */}
+                  <span className="absolute left-[54px] px-2 py-1 bg-slate-900 text-white text-[11px] font-medium rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 z-50 shadow-md">
+                    {!isPremium ? 'Live Capture 👑 (Pro Plan)' : 'Live Capture (Ready)'}
+                  </span>
+                </button>
+              );
+            }
 
             return (
               <Link

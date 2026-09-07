@@ -3,6 +3,8 @@
 import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
+import UpgradeModal from '@/components/ui/UpgradeModal';
+import LiveCaptureModal from '@/components/meetings/LiveCaptureModal';
 
 export default function AppLayoutClient({
   children,
@@ -19,6 +21,10 @@ export default function AppLayoutClient({
         {!isSettings && <TopBar />}
         <main suppressHydrationWarning className={`flex-1 ${isSettings ? 'p-0' : 'p-6 md:p-8'}`}>{children}</main>
       </div>
+
+      {/* Global Modals for Pro Features & Live Capture */}
+      <UpgradeModal />
+      <LiveCaptureModal />
 
       {/* Floating Help / Support Button (Bottom Right) */}
       <button

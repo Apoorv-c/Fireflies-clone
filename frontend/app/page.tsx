@@ -10,11 +10,26 @@ import {
   Settings,
   Flame,
   ArrowRight,
-  Clock
+  Clock,
+  Zap
 } from 'lucide-react';
 import { useMeetings } from '@/hooks/useMeetings';
 import { useUIStore } from '@/lib/store';
 import MeetingSettingsModal from '@/components/meetings/MeetingSettingsModal';
+
+function ProCrownBadge({ className = "w-2.5 h-2.5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 13 11" fill="none" className={className}>
+      <path
+        d="M1 9.5H12M1.5 7.5L1 2L4.5 4.8L6.5 1.5L8.5 4.8L12 2L11.5 7.5H1.5Z"
+        fill="#6C5CE7"
+        stroke="#6C5CE7"
+        strokeWidth="0.8"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 function formatMeetingDate(dateStr: string): string {
   const d = new Date(dateStr);
@@ -34,7 +49,13 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'recent' | 'upcoming' | 'ai-feed'>('recent');
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const { data: meetings, isLoading } = useMeetings({ sort_by: 'newest' });
-  const { setIsCreateModalOpen } = useUIStore();
+  const {
+    setIsCreateModalOpen,
+    isPremium,
+    setIsUpgradeModalOpen,
+    setUpgradeModalFeature,
+    setIsLiveCaptureOpen,
+  } = useUIStore();
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 py-2" suppressHydrationWarning>
@@ -84,20 +105,36 @@ export default function HomePage() {
             <ChevronRight size={15} className="text-slate-400 group-hover:translate-x-0.5 transition-transform" />
           </button>
 
-          {/* Card 3: Capture Meeting (Lavender) */}
+          {/* Card 3: Live Capture (Lavender / Pro) */}
           <button
             type="button"
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => {
+              if (!isPremium) {
+                setUpgradeModalFeature('Live Capture');
+                setIsUpgradeModalOpen(true);
+              } else {
+                setIsLiveCaptureOpen(true);
+              }
+            }}
             suppressHydrationWarning
             className="flex items-center justify-between p-4 rounded-xl bg-[#f5f3ff] hover:bg-[#ede9fe] border border-[#ede9fe] transition-all text-left group cursor-pointer"
           >
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-[#ede9fe] flex items-center justify-center text-[#6C5CE7]">
-                <Plus size={16} />
+                <Zap size={16} />
               </div>
-              <span className="text-xs font-semibold text-slate-800 group-hover:text-slate-900">
-                Capture Meeting
-              </span>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-semibold text-slate-800 group-hover:text-slate-900">
+                    Live Capture
+                  </span>
+                  <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white border border-[#6C5CE7]/30 text-[#6C5CE7] text-[10px] font-bold shadow-2xs">
+                    <ProCrownBadge className="w-2.5 h-2.5" />
+                    Pro
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500">Record in-person audio</p>
+              </div>
             </div>
             <ChevronRight size={15} className="text-slate-400 group-hover:translate-x-0.5 transition-transform" />
           </button>
