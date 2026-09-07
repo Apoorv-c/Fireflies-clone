@@ -15,9 +15,11 @@ interface UIState {
   searchQuery: string;
   transcriptSearchQuery: string;
   sidebarOpen: boolean;
+  isCreateModalOpen: boolean;
   setSearchQuery: (query: string) => void;
   setTranscriptSearchQuery: (query: string) => void;
   setSidebarOpen: (open: boolean) => void;
+  setIsCreateModalOpen: (open: boolean) => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set) => ({
@@ -35,7 +37,9 @@ export const useUIStore = create<UIState>((set) => ({
   searchQuery: '',
   transcriptSearchQuery: '',
   sidebarOpen: true,
+  isCreateModalOpen: false,
   setSearchQuery: (query) => set({ searchQuery: query }),
   setTranscriptSearchQuery: (query) => set({ transcriptSearchQuery: query }),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
+  setIsCreateModalOpen: (open) => set({ isCreateModalOpen: open }),
 }));
