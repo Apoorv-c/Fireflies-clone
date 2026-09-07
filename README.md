@@ -196,13 +196,30 @@ Since there are no real audio files, the player simulates playback with a `setIn
 
 ---
 
-## 📝 Assumptions
+## 📝 Assumptions, Mocked Data & Notes
 
-- **Authentication**: Default user is pre-authenticated (no login flow)
-- **Audio**: Placeholder player with simulated playback (no real audio files)
-- **Transcription**: Pre-seeded in database (no live recording/transcription)
-- **AI Summary**: Mock LLM service generates summaries from transcript content
-- **File Upload**: Supports .vtt, .txt, and .json transcript formats
+### 1. Key Assumptions
+- **Pre-Authenticated User Persona:** The workspace defaults to an active user profile (**Alex Vance**, `alex.vance@company.com`) without a mandatory OAuth/SSO login wall to make evaluating features immediate.
+- **Client-Side Voiceover & Audio:** In place of heavy external audio hosting or paid TTS APIs (ElevenLabs/AWS Polly), the player uses the browser's native **Web Speech Synthesis API** (`speechSynthesis`) to provide realistic multi-speaker voice narration synced with the transcript.
+- **Plan & Billing Simulation:** Upgrades to Pro / Business plans are handled via optimistic local state with instant feature unlock (1080p video capture, custom bot name, live capture) without requiring real credit card processing or Stripe webhook listeners.
+- **Embedded Database:** Uses an embedded SQLite database (`meetings.db`) with SQLAlchemy ORM and cascading deletes, requiring zero cloud database provisioning for local setups.
+
+### 2. Mocked Data
+- **5 Realistic Seeded Meetings:** Complete with 190+ unique conversation segments, natural speaker alternation, timestamps, topics, and action items:
+  - *Q3 Product Roadmap Review* (62 min, 45 segments, 4 attendees)
+  - *Engineering Sprint Planning* (48 min, 38 segments, 5 attendees)
+  - *Design Critique* (35 min, 28 segments, 3 attendees)
+  - *Customer Success Call* (27 min, 22 segments, 2 attendees)
+  - *Team All-Hands* (90 min, 60 segments, 8 attendees)
+- **AI Summary & AskFred Intelligence:** Structured extraction of summaries, chapters, action item checklists, and chat responses based on indexed transcript segments.
+- **Third-Party Integrations:** 12 ecosystem tools (Zoom, Google Meet, Microsoft Teams, Slack, Notion, HubSpot, Salesforce, etc.) with functional connect/disconnect toggle states.
+- **Pricing & Tier Structure:** Exact replica of Fireflies' 4 tiers (Free $0, Pro $10/mo, Business $19/mo, Enterprise $39/mo) with monthly/annual 40% discount toggles.
+
+### 3. Implementation Notes
+- **O(log n) Transcript Sync:** Binary search tracks `start_time <= currentTime < end_time` during playback ticks (4Hz), triggering smooth auto-scroll to the currently active dialogue bubble.
+- **Hybrid State Management:** Zustand manages low-latency player state, UI drawers, and user preferences; TanStack React Query handles cached server data, optimistic task toggling, and revalidation.
+- **Responsive & Mobile-First:** Adaptive layouts across 360px to 4K displays with bottom navigation docks, touch-friendly scrubber controls, and slide-out mobile navigation.
+- **Zero External API Dependency:** Entire stack runs offline with no required OpenAI, Deepgram, or Stripe API keys.
 
 ---
 
