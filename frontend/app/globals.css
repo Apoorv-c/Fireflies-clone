@@ -10,20 +10,33 @@
   --accent: #6C5CE7;
   --accent-light: #a29bfe;
   --text-primary: #f1f3fa;
-  --text-secondary: #8b8ba3;
+  --text-secondary: #9499b7;
   --border: #202540;
+}
+
+/* Reset buttons and form controls so browser defaults never show white backgrounds */
+button {
+  background-color: transparent;
+  color: inherit;
+  border: none;
+  font-family: inherit;
+}
+
+input, select, textarea {
+  font-family: inherit;
 }
 
 html {
   overflow-y: auto;
   scroll-behavior: smooth;
+  background-color: #0a0d1a;
 }
 
 body {
   min-height: 100vh;
   overflow-x: hidden;
-  background-color: var(--content-bg);
-  color: var(--text-primary);
+  background-color: #0a0d1a;
+  color: #f1f3fa;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -33,7 +46,7 @@ body {
   height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--content-bg);
+  background: #0a0d1a;
 }
 ::-webkit-scrollbar-thumb {
   background: #252b4a;

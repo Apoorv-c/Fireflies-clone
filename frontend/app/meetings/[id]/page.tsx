@@ -262,14 +262,14 @@ export default function MeetingDetailPage() {
         <div className="lg:col-span-5">
           <div className="bg-[#121526] rounded-xl border border-[#232845] h-[680px] flex flex-col shadow-lg overflow-hidden">
             {/* Tabs Header */}
-            <div className="flex border-b border-[#232845] bg-[#15192d] p-1.5 gap-1 flex-shrink-0">
+            <div className="flex border-b border-[#232845] bg-[#121526] p-1.5 gap-1.5 flex-shrink-0">
               <button
                 onClick={() => setActiveTab('summary')}
                 suppressHydrationWarning
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
                   activeTab === 'summary'
-                    ? 'bg-[#6C5CE7] text-white shadow-md'
-                    : 'text-[#8b8ba3] hover:text-white hover:bg-[#1f243d]'
+                    ? 'bg-[#6C5CE7] text-white shadow-md border border-[#6C5CE7]'
+                    : 'bg-[#181d33] text-[#9ca3af] hover:text-white hover:bg-[#202644] border border-[#262c4a]'
                 }`}
               >
                 <Sparkles size={13} />
@@ -281,8 +281,8 @@ export default function MeetingDetailPage() {
                 suppressHydrationWarning
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
                   activeTab === 'actions'
-                    ? 'bg-[#6C5CE7] text-white shadow-md'
-                    : 'text-[#8b8ba3] hover:text-white hover:bg-[#1f243d]'
+                    ? 'bg-[#6C5CE7] text-white shadow-md border border-[#6C5CE7]'
+                    : 'bg-[#181d33] text-[#9ca3af] hover:text-white hover:bg-[#202644] border border-[#262c4a]'
                 }`}
               >
                 <CheckSquare size={13} />
@@ -294,8 +294,8 @@ export default function MeetingDetailPage() {
                 suppressHydrationWarning
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
                   activeTab === 'ask'
-                    ? 'bg-[#6C5CE7] text-white shadow-md'
-                    : 'text-[#8b8ba3] hover:text-white hover:bg-[#1f243d]'
+                    ? 'bg-[#6C5CE7] text-white shadow-md border border-[#6C5CE7]'
+                    : 'bg-[#181d33] text-[#9ca3af] hover:text-white hover:bg-[#202644] border border-[#262c4a]'
                 }`}
               >
                 <Bot size={13} />

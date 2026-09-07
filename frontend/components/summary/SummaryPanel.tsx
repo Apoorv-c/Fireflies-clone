@@ -9,7 +9,7 @@ import Skeleton from '@/components/ui/Skeleton';
 function formatTimestamp(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
 interface SummaryPanelProps {
@@ -19,95 +19,144 @@ interface SummaryPanelProps {
 export default function SummaryPanel({ meetingId }: SummaryPanelProps) {
   const { data: summary, isLoading } = useSummary(meetingId);
   const setCurrentTime = usePlayerStore((s) => s.setCurrentTime);
-  const [expandedTopics, setExpandedTopics] = useState<Set<number>>(new Set());
+  const setIsPlaying = usePlayerStore((s) => s.setIsPlaying);
+  const [expandedTopics, setExpandedTopics] = useState<Set<number>>(new Set([0, 1])); // Expand first 2 by default
 
   const toggleTopic = (index: number) => {
-    const newSet = new Set(expandedTopics);
-    if (newSet.has(index)) {
-      newSet.delete(index);
+    const next = new Set(expandedTopics);
+    if (next.has(index)) {
+      next.delete(index);
     } else {
-      newSet.add(index);
+      next.add(index);
     }
-    setExpandedTopics(newSet);
+    setExpandedTopics(next);
+  };
+
+  const handleSeek = (time: number) => {
+    setCurrentTime(time);
+    setIsPlaying(true);
   };
 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-4 w-32" />
-        <Skeleton className="h-20 w-full rounded-lg" />
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-10 w-full rounded-lg" />
-        <Skeleton className="h-10 w-full rounded-lg" />
+        <Skeleton className="h-5 w-36 mb-2" />
+        <Skeleton className="h-24 w-full rounded-xl mb-4" />
+        <Skeleton className="h-5 w-28 mb-2" />
+        <Skeleton className="h-14 w-full rounded-xl" />
+        <Skeleton className="h-14 w-full rounded-xl" />
       </div>
     );
   }
 
   if (!summary) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-[#8b8ba3]">
-        <Sparkles size={32} className="mb-3 text-[#6C5CE7]" />
-        <p className="text-sm">No summary available yet</p>
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="w-12 h-12 rounded-full bg-[#6C5CE7]/15 flex items-center justify-center text-[#6C5CE7] mb-3">
+          <Sparkles size={24} />
+        </div>
+        <p className="text-sm font-medium text-white">No summary generated yet</p>
+        <p className="text-xs text-[#8b8ba3] mt-1">AI summary will appear here once processed.</p>
       </div>
     );
   }
 
+  const topics = summary.key_topics || [];
+  const chapters = summary.chapters || [];
+
   return (
-    <div className="space-y-6">
-      {/* AI Summary Badge */}
-      <div className="flex items-center gap-2 text-[#6C5CE7]">
-        <Sparkles size={16} />
-        <span className="text-sm font-semibold">AI Summary</span>
+    <div className="space-y-6" suppressHydrationWarning>
+      {/* Executive Summary Card */}
+      <div className="bg-[#161a2e] border border-[#252b47] rounded-xl p-4 shadow-sm">
+        <div className="flex items-center gap-2 text-[#a29bfe] font-semibold text-xs uppercase tracking-wider mb-2.5">
+          <Sparkles size={14} className="text-[#6C5CE7]" />
+          <span>Executive Overview</span>
+        </div>
+        <p className="text-sm text-[#f1f3fa] leading-relaxed font-normal">
+          {summary.overview}
+        </p>
       </div>
 
-      {/* Overview */}
-      <div className="bg-[#1a1a2e] rounded-lg p-4">
-        <p className="text-sm text-[#e0e0e0] leading-relaxed">{summary.overview}</p>
-      </div>
-
-      {/* Key Topics */}
-      {summary.key_topics && summary.key_topics.length > 0 && (
+      {/* Key Topics Section */}
+      {topics.length > 0 && (
         <div>
-          <h4 className="text-sm font-semibold text-[#8b8ba3] mb-3 uppercase tracking-wider">Key Topics</h4>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-xs font-bold text-[#8b8ba3] uppercase tracking-wider">
+              Key Topics ({topics.length})
+            </h4>
+            <span className="text-[11px] text-[#6b7294]">Click to expand</span>
+          </div>
+
           <div className="space-y-2">
-            {summary.key_topics.map((topic, i) => (
-              <div key={i} className="bg-[#1a1a2e] rounded-lg overflow-hidden">
-                <button
-                  onClick={() => toggleTopic(i)}
-                  className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-[#2a2a4a]/50 transition-colors"
+            {topics.map((topic, i) => {
+              const isExpanded = expandedTopics.has(i);
+              return (
+                <div
+                  key={i}
+                  className="bg-[#161a2e] border border-[#252b47] hover:border-[#353e66] rounded-xl overflow-hidden transition-all duration-150"
                 >
-                  {expandedTopics.has(i) ? (
-                    <ChevronDown size={16} className="text-[#6C5CE7] flex-shrink-0" />
-                  ) : (
-                    <ChevronRight size={16} className="text-[#8b8ba3] flex-shrink-0" />
+                  <button
+                    onClick={() => toggleTopic(i)}
+                    type="button"
+                    suppressHydrationWarning
+                    className="w-full flex items-center justify-between px-4 py-3 text-left transition-colors bg-transparent"
+                  >
+                    <div className="flex items-center gap-2.5 flex-1 pr-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#6C5CE7]" />
+                      <span className="text-xs sm:text-sm font-semibold text-white">
+                        {topic.title}
+                      </span>
+                    </div>
+
+                    <div className="p-1 rounded text-[#8b8ba3]">
+                      {isExpanded ? (
+                        <ChevronDown size={15} className="text-[#a29bfe]" />
+                      ) : (
+                        <ChevronRight size={15} />
+                      )}
+                    </div>
+                  </button>
+
+                  {isExpanded && (
+                    <div className="px-4 pb-3.5 pt-1 border-t border-[#1e233d] bg-[#121526]/60">
+                      <p className="text-xs text-[#c5c9de] leading-relaxed">
+                        {topic.description}
+                      </p>
+                    </div>
                   )}
-                  <span className="text-sm font-medium text-[#e0e0e0]">{topic.title}</span>
-                </button>
-                {expandedTopics.has(i) && (
-                  <div className="px-4 pb-3 pl-10">
-                    <p className="text-xs text-[#8b8ba3] leading-relaxed">{topic.description}</p>
-                  </div>
-                )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Chapters */}
-      {summary.chapters && summary.chapters.length > 0 && (
+      {/* Chapters / Timeline Section */}
+      {chapters.length > 0 && (
         <div>
-          <h4 className="text-sm font-semibold text-[#8b8ba3] mb-3 uppercase tracking-wider">Chapters</h4>
-          <div className="space-y-1">
-            {summary.chapters.map((chapter, i) => (
+          <h4 className="text-xs font-bold text-[#8b8ba3] uppercase tracking-wider mb-3">
+            Chapters &amp; Timeline ({chapters.length})
+          </h4>
+
+          <div className="space-y-1.5">
+            {chapters.map((chapter, i) => (
               <button
                 key={i}
-                onClick={() => setCurrentTime(chapter.start_time)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-[#1a1a2e] transition-colors group text-left"
+                onClick={() => handleSeek(chapter.start_time)}
+                type="button"
+                suppressHydrationWarning
+                className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#161a2e] hover:bg-[#1e233d] border border-[#252b47] hover:border-[#3b436e] transition-all group text-left"
               >
-                <Clock size={14} className="text-[#6C5CE7] flex-shrink-0" />
-                <span className="text-sm text-[#e0e0e0] flex-1">{chapter.title}</span>
-                <span className="text-xs font-mono text-[#6C5CE7] group-hover:text-[#a29bfe]">
+                <div className="flex items-center gap-2.5 flex-1 pr-2">
+                  <div className="w-6 h-6 rounded-lg bg-[#6C5CE7]/15 flex items-center justify-center text-[#a29bfe] group-hover:bg-[#6C5CE7] group-hover:text-white transition-colors">
+                    <Clock size={12} />
+                  </div>
+                  <span className="text-xs font-medium text-white group-hover:text-[#a29bfe] transition-colors">
+                    {chapter.title}
+                  </span>
+                </div>
+
+                <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[#1e233d] group-hover:bg-[#6C5CE7] text-[#a29bfe] group-hover:text-white transition-all font-semibold">
                   {formatTimestamp(chapter.start_time)}
                 </span>
               </button>
