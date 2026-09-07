@@ -8,9 +8,6 @@ import {
   Plus,
   ChevronRight,
   Settings,
-  Monitor,
-  Smartphone,
-  Download,
   Flame,
   ArrowRight,
   Clock
@@ -214,66 +211,6 @@ export default function HomePage() {
             <p className="text-xs">No recent meetings. Click &apos;Capture Meeting&apos; to get started.</p>
           </div>
         )}
-      </section>
-
-      {/* 3. Try More Section */}
-      <section className="pt-4">
-        <h3 className="text-sm font-bold text-slate-900 tracking-tight mb-3">
-          Try More
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Card 1: Desktop App */}
-          <div className="p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 flex flex-col justify-between">
-            <div>
-              <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center mb-3">
-                <Monitor size={18} strokeWidth={2} />
-              </div>
-              <h4 className="text-xs font-bold text-slate-900 mb-1">
-                Desktop App
-              </h4>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Capture conversations without any bot present in your meeting.
-              </p>
-            </div>
-
-            <div className="pt-5">
-              <button
-                type="button"
-                suppressHydrationWarning
-                onClick={() => alert('Download link for Windows / Mac Desktop app')}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[#6C5CE7] hover:bg-[#5a4bd6] text-white text-xs font-semibold shadow-xs transition-all active:scale-95 cursor-pointer"
-              >
-                <Download size={14} />
-                <span>Download</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Card 2: Mobile App */}
-          <div className="p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 flex flex-col justify-between">
-            <div>
-              <div className="w-8 h-8 rounded-lg bg-pink-50 text-pink-500 flex items-center justify-center mb-3">
-                <Smartphone size={18} strokeWidth={2} />
-              </div>
-              <h4 className="text-xs font-bold text-slate-900 mb-1">
-                Mobile App
-              </h4>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Record in-person conversations and review meetings on the go.
-              </p>
-            </div>
-
-            <div className="pt-5 flex items-center gap-2">
-              <div className="w-7 h-7 rounded-md bg-white border border-slate-200 flex items-center justify-center text-slate-700 shadow-xs font-bold text-xs" title="Apple App Store">
-                🍎
-              </div>
-              <div className="w-7 h-7 rounded-md bg-white border border-slate-200 flex items-center justify-center text-slate-700 shadow-xs font-bold text-xs" title="Google Play Store">
-                ▶️
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
     </div>
   );
