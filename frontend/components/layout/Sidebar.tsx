@@ -25,6 +25,26 @@ interface NavDockItem {
   hasDot?: boolean;
 }
 
+function IntegrationsStackIcon({ size = 18, strokeWidth = 1.75, className }: { size?: number; strokeWidth?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M12 3.5 L20.5 7.8 L12 12.2 L3.5 7.8 Z" />
+      <path d="M3.5 12.2 L12 16.5 L20.5 12.2" />
+      <path d="M3.5 16.5 L12 20.8 L20.5 16.5" />
+    </svg>
+  );
+}
+
 const mainNavItems: NavDockItem[] = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/meetings', label: 'Meetings', icon: Video },
@@ -32,7 +52,7 @@ const mainNavItems: NavDockItem[] = [
   { href: '/meetings/1', label: 'Fred AI Assistant', icon: Bot },
   { href: '/meetings', label: 'AI Summaries', icon: Sparkles },
   { href: '/meetings', label: 'Analytics', icon: BarChart2 },
-  { href: '/settings', label: 'Integrations', icon: Layers },
+  { href: '/integrations', label: 'Integrations', icon: IntegrationsStackIcon },
   { href: '/meetings', label: 'Live Capture', icon: Zap, hasDot: true },
 ];
 
