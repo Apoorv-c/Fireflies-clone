@@ -179,6 +179,18 @@ export default function Sidebar() {
                   type="button"
                   onClick={() => {
                     setIsAccountMenuOpen(false);
+                    router.push('/plan');
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-[#6C5CE7] hover:bg-purple-50 transition-colors cursor-pointer text-left"
+                >
+                  <Crown size={15} className="text-[#6C5CE7]" />
+                  <span>Upgrade Plans &amp; Pricing</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAccountMenuOpen(false);
                     router.push('/settings?tab=account');
                   }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer text-left"
@@ -496,6 +508,15 @@ export default function Sidebar() {
 
             {/* Bottom Actions inside Drawer */}
             <div className="pt-3 border-t border-slate-100 space-y-1">
+              <Link
+                href="/plan"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-[#6C5CE7] hover:bg-purple-50 transition-colors"
+              >
+                <Crown size={17} className="text-[#6C5CE7]" />
+                <span>Upgrade Plans &amp; Pricing</span>
+              </Link>
+
               <Link
                 href="/settings?tab=account"
                 onClick={() => setMobileMenuOpen(false)}

@@ -7,7 +7,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import UserAvatar from '@/components/ui/UserAvatar';
 
 export default function TopBar() {
-  const { searchQuery, setSearchQuery, setIsCreateModalOpen, setIsAccountModalOpen, setMobileMenuOpen } = useUIStore();
+  const { searchQuery, setSearchQuery, setIsCreateModalOpen, setIsAccountModalOpen, setMobileMenuOpen, isPremium } = useUIStore();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -84,6 +84,7 @@ export default function TopBar() {
     if (pathname === '/meetings') return 'Notebook';
     if (pathname === '/search') return 'Search All';
     if (pathname === '/settings') return 'Settings';
+    if (pathname === '/plan') return 'Plan';
     return 'Fireflies AI';
   };
 
@@ -124,8 +125,23 @@ export default function TopBar() {
           </div>
         </form>
 
-        {/* Right Actions: Working Notifications Bell & Capture */}
+        {/* Right Actions: Free Meetings badge, Notifications Bell & Capture */}
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+          {/* Free Meetings Pill / Pro Active badge */}
+          <button
+            type="button"
+            onClick={() => router.push('/plan')}
+            title="View Plans & Upgrade"
+            className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-slate-200/80 hover:border-slate-300 hover:bg-slate-50 transition-all cursor-pointer"
+          >
+            <span className={`text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-none ${isPremium ? 'bg-[#6C5CE7]' : 'bg-[#10B981]'}`}>
+              {isPremium ? 'PRO' : '3'}
+            </span>
+            <span className="text-slate-600 text-xs font-medium">
+              {isPremium ? 'Business Active' : 'Free meetings'}
+            </span>
+          </button>
+
           {/* Notification Bell with Working Dropdown */}
           <div className="relative" ref={notifRef}>
             <button

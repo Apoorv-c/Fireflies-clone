@@ -283,13 +283,7 @@ export default function SettingsPage() {
                 <span>You are eligible for 7 days business plan free trial. </span>
                 <button
                   type="button"
-                  onClick={() => {
-                    setProFeatureContext({
-                      title: 'Start 7-Day Business Trial',
-                      desc: 'Unlock meeting video recording, custom notetaker name, and automated retention policies.',
-                    });
-                    setIsTrialModalOpen(true);
-                  }}
+                  onClick={() => router.push('/plan')}
                   className="text-[#6C5CE7] hover:text-[#5a4bd6] font-semibold underline underline-offset-2 ml-1 cursor-pointer transition-colors inline-flex items-center gap-0.5"
                 >
                   Start free trial &rarr;
