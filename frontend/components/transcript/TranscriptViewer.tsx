@@ -26,11 +26,16 @@ export default function TranscriptViewer({ meetingId }: TranscriptViewerProps) {
   // Sync transcript highlighting with current audio time
   useTranscriptSync(segments || []);
 
-  // Auto-scroll to active segment
+  // Auto-scroll to active segment inside container only (prevent moving entire page)
   useEffect(() => {
-    if (activeSegmentId && segmentRefs.current.has(activeSegmentId)) {
+    if (activeSegmentId && segmentRefs.current.has(activeSegmentId) && containerRef.current) {
       const el = segmentRefs.current.get(activeSegmentId);
-      el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const container = containerRef.current;
+      if (el && container) {
+        const elTop = el.offsetTop - container.offsetTop;
+        const targetScroll = elTop - container.clientHeight / 2 + el.clientHeight / 2;
+        container.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+      }
     }
   }, [activeSegmentId]);
 

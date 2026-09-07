@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { Play, Pause, RotateCcw, RotateCw, Volume2, VolumeX, Sparkles } from 'lucide-react';
+import { Play, Pause, RotateCcw, RotateCw, Volume2, VolumeX, Sparkles, Volume1 } from 'lucide-react';
 import { usePlayerStore } from '@/lib/store';
 import type { TranscriptSegment } from '@/types';
 
@@ -19,21 +19,200 @@ interface AudioPlayerProps {
 
 export default function AudioPlayer({ audioUrl, duration: meetingDuration, segments = [] }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const { currentTime, isPlaying, duration, setCurrentTime, setIsPlaying, setDuration } = usePlayerStore();
+  const { currentTime, isPlaying, duration, activeSegmentId, setCurrentTime, setIsPlaying, setDuration, setActiveSegmentId } = usePlayerStore();
+  
   const [playbackRate, setPlaybackRate] = useState<number>(1);
-  const [volume, setVolume] = useState<number>(0.8);
+  const [volume, setVolume] = useState<number>(0.9);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [voiceVoiceover, setVoiceVoiceover] = useState<boolean>(true);
+  const [currentSpeaker, setCurrentSpeaker] = useState<string | null>(null);
+
+  // References for speech synthesis engine
+  const currentSpeakingIndexRef = useRef<number | null>(null);
+  const isSpeakingRef = useRef<boolean>(false);
+  const keepAliveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
 
   // Sync total duration
   useEffect(() => {
     setDuration(meetingDuration);
   }, [meetingDuration, setDuration]);
 
-  // Handle native audio events if real audio is provided
+  // Load browser voices
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+
+    const updateVoices = () => {
+      const vs = window.speechSynthesis.getVoices();
+      if (vs && vs.length > 0) {
+        voicesRef.current = vs;
+      }
+    };
+
+    updateVoices();
+    window.speechSynthesis.onvoiceschanged = updateVoices;
+
+    return () => {
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = null;
+      }
+    };
+  }, []);
+
+  // Pick a voice and pitch for a specific speaker to give each person a unique character
+  const getSpeakerVoiceSettings = useCallback((speakerLabel: string) => {
+    const voices = voicesRef.current;
+    if (!voices || voices.length === 0) {
+      return { voice: null, pitch: 1.0 };
+    }
+
+    // Filter English voices if available, otherwise any
+    const enVoices = voices.filter(v => v.lang.startsWith('en'));
+    const pool = enVoices.length > 0 ? enVoices : voices;
+
+    // Hash speaker name into consistent index
+    let hash = 0;
+    for (let i = 0; i < speakerLabel.length; i++) {
+      hash = (hash << 5) - hash + speakerLabel.charCodeAt(i);
+      hash |= 0;
+    }
+    const absHash = Math.abs(hash);
+    const selectedVoice = pool[absHash % pool.length];
+
+    // Subtle pitch variations: 0.9 (deeper), 1.0 (neutral), 1.15 (lighter)
+    const pitches = [0.95, 1.05, 0.9, 1.1, 1.0];
+    const pitch = pitches[absHash % pitches.length];
+
+    return { voice: selectedVoice, pitch };
+  }, []);
+
+  // Clear running timers
+  const clearTimers = useCallback(() => {
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
+    if (keepAliveTimerRef.current) {
+      clearInterval(keepAliveTimerRef.current);
+      keepAliveTimerRef.current = null;
+    }
+  }, []);
+
+  // Main speech synthesis trigger for a given segment index
+  const speakSegment = useCallback((index: number) => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+
+    clearTimers();
+    window.speechSynthesis.cancel();
+
+    if (index < 0 || index >= segments.length) {
+      setIsPlaying(false);
+      isSpeakingRef.current = false;
+      currentSpeakingIndexRef.current = null;
+      setCurrentSpeaker(null);
+      return;
+    }
+
+    const seg = segments[index];
+    currentSpeakingIndexRef.current = index;
+    isSpeakingRef.current = true;
+    setCurrentSpeaker(seg.speaker_label);
+    setCurrentTime(seg.start_time);
+    setActiveSegmentId(seg.id);
+
+    // If user disabled voice voiceover or is muted, silently advance time
+    if (!voiceVoiceover || isMuted) {
+      const segDuration = Math.max(1, seg.end_time - seg.start_time);
+      const startTime = Date.now();
+
+      progressTimerRef.current = setInterval(() => {
+        const elapsed = (Date.now() - startTime) / 1000 * playbackRate;
+        const nextTime = seg.start_time + elapsed;
+
+        if (nextTime >= seg.end_time) {
+          clearInterval(progressTimerRef.current!);
+          progressTimerRef.current = null;
+          if (usePlayerStore.getState().isPlaying) {
+            speakSegment(index + 1);
+          }
+        } else {
+          setCurrentTime(nextTime);
+        }
+      }, 100);
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(seg.content);
+    utterance.rate = playbackRate;
+    utterance.volume = volume;
+
+    const { voice, pitch } = getSpeakerVoiceSettings(seg.speaker_label || 'Speaker');
+    if (voice) utterance.voice = voice;
+    utterance.pitch = pitch;
+
+    // Smooth scrubber progress while speaking
+    const segDuration = Math.max(1, seg.end_time - seg.start_time);
+    let utteranceStartTime = Date.now();
+
+    utterance.onstart = () => {
+      utteranceStartTime = Date.now();
+      isSpeakingRef.current = true;
+
+      progressTimerRef.current = setInterval(() => {
+        const elapsed = (Date.now() - utteranceStartTime) / 1000 * playbackRate;
+        const progressTime = Math.min(seg.end_time, seg.start_time + elapsed);
+        setCurrentTime(progressTime);
+      }, 150);
+
+      // Chrome 14-second pause bug workaround
+      keepAliveTimerRef.current = setInterval(() => {
+        if (typeof window !== 'undefined' && window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+          window.speechSynthesis.pause();
+          window.speechSynthesis.resume();
+        }
+      }, 9000);
+    };
+
+    utterance.onend = () => {
+      clearTimers();
+      isSpeakingRef.current = false;
+      setCurrentTime(seg.end_time);
+
+      // Advance to next segment if still in playing mode
+      if (usePlayerStore.getState().isPlaying) {
+        if (index + 1 < segments.length) {
+          setTimeout(() => {
+            if (usePlayerStore.getState().isPlaying) {
+              speakSegment(index + 1);
+            }
+          }, 100);
+        } else {
+          setIsPlaying(false);
+          setCurrentTime(0);
+          currentSpeakingIndexRef.current = null;
+          setCurrentSpeaker(null);
+        }
+      }
+    };
+
+    utterance.onerror = (e) => {
+      clearTimers();
+      isSpeakingRef.current = false;
+      if (e.error !== 'canceled' && e.error !== 'interrupted') {
+        if (usePlayerStore.getState().isPlaying && index + 1 < segments.length) {
+          speakSegment(index + 1);
+        }
+      }
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }, [segments, voiceVoiceover, isMuted, playbackRate, volume, getSpeakerVoiceSettings, clearTimers, setCurrentTime, setActiveSegmentId, setIsPlaying]);
+
+  // Handle native audio element if real audio URL is available
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !audioUrl) return;
 
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
     const onLoadedMetadata = () => setDuration(audio.duration);
@@ -48,68 +227,76 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
       audio.removeEventListener('loadedmetadata', onLoadedMetadata);
       audio.removeEventListener('ended', onEnded);
     };
-  }, [setCurrentTime, setDuration, setIsPlaying]);
+  }, [audioUrl, setCurrentTime, setDuration, setIsPlaying]);
 
-  // Voice narration using Web Speech API when audioUrl is not available
-  const speakCurrentSegment = useCallback((time: number) => {
-    if (typeof window === 'undefined' || !window.speechSynthesis || !voiceVoiceover) return;
-
-    // Find segment corresponding to current time
-    const currentSeg = segments.find(s => time >= s.start_time && time < s.end_time);
-    if (!currentSeg) return;
-
-    window.speechSynthesis.cancel(); // Stop prior speech
-    if (isMuted) return;
-
-    const utterance = new SpeechSynthesisUtterance(currentSeg.content);
-    utterance.rate = playbackRate;
-    utterance.volume = isMuted ? 0 : volume;
-    window.speechSynthesis.speak(utterance);
-  }, [segments, voiceVoiceover, playbackRate, volume, isMuted]);
-
-  // Play / Pause toggle
-  const togglePlay = () => {
-    const nextState = !isPlaying;
-    setIsPlaying(nextState);
-
-    if (audioRef.current && audioUrl) {
-      if (nextState) {
-        audioRef.current.play().catch(() => {});
+  // React to isPlaying changes from store (both internal button clicks and external triggers)
+  useEffect(() => {
+    if (audioUrl) {
+      if (isPlaying) {
+        audioRef.current?.play().catch(() => {});
       } else {
-        audioRef.current.pause();
+        audioRef.current?.pause();
+      }
+      return;
+    }
+
+    // TTS mode without audioUrl
+    if (isPlaying) {
+      // Find matching segment index based on currentTime
+      const current = usePlayerStore.getState().currentTime;
+      let targetIdx = segments.findIndex(s => current >= s.start_time && current < s.end_time);
+      if (targetIdx === -1) {
+        targetIdx = segments.findIndex(s => s.start_time >= current);
+      }
+      if (targetIdx === -1) targetIdx = 0;
+
+      // If we are already speaking this segment, don't restart
+      if (!isSpeakingRef.current || currentSpeakingIndexRef.current !== targetIdx) {
+        speakSegment(targetIdx);
       }
     } else {
-      if (nextState) {
-        speakCurrentSegment(currentTime);
-      } else {
-        if (typeof window !== 'undefined' && window.speechSynthesis) {
-          window.speechSynthesis.cancel();
+      clearTimers();
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      isSpeakingRef.current = false;
+      currentSpeakingIndexRef.current = null;
+      setCurrentSpeaker(null);
+    }
+  }, [isPlaying, audioUrl, segments, speakSegment, clearTimers]);
+
+  // React to seek or jump when already playing (e.g. user clicked another segment or chapter)
+  useEffect(() => {
+    if (!isPlaying || audioUrl || segments.length === 0) return;
+
+    const currentIdx = currentSpeakingIndexRef.current;
+    if (currentIdx !== null && segments[currentIdx]) {
+      const activeSeg = segments[currentIdx];
+      // If currentTime jumped outside current segment boundaries, switch segment immediately
+      if (currentTime < activeSeg.start_time - 0.5 || currentTime >= activeSeg.end_time + 0.5) {
+        let targetIdx = segments.findIndex(s => currentTime >= s.start_time && currentTime < s.end_time);
+        if (targetIdx === -1) targetIdx = segments.findIndex(s => s.start_time >= currentTime);
+        if (targetIdx !== -1 && targetIdx !== currentIdx) {
+          speakSegment(targetIdx);
         }
       }
     }
-  };
+  }, [currentTime, isPlaying, audioUrl, segments, speakSegment]);
 
-  // Clock progression when simulated
+  // Cleanup on unmount
   useEffect(() => {
-    if (!audioUrl && isPlaying) {
-      const interval = setInterval(() => {
-        const nextTime = usePlayerStore.getState().currentTime + (0.5 * playbackRate);
-        const maxDuration = duration || meetingDuration || 3600;
+    return () => {
+      clearTimers();
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, [clearTimers]);
 
-        if (nextTime >= maxDuration) {
-          setIsPlaying(false);
-          setCurrentTime(0);
-          if (typeof window !== 'undefined' && window.speechSynthesis) {
-            window.speechSynthesis.cancel();
-          }
-        } else {
-          setCurrentTime(nextTime);
-        }
-      }, 500);
-
-      return () => clearInterval(interval);
-    }
-  }, [audioUrl, isPlaying, playbackRate, duration, meetingDuration, setCurrentTime, setIsPlaying]);
+  // Play / Pause toggle button
+  const togglePlay = () => {
+    setIsPlaying(!isPlaying);
+  };
 
   const handleSeek = (time: number) => {
     const clamped = Math.max(0, Math.min(time, duration || meetingDuration));
@@ -117,8 +304,11 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
     if (audioRef.current) {
       audioRef.current.currentTime = clamped;
     }
-    if (isPlaying) {
-      speakCurrentSegment(clamped);
+    if (isPlaying && !audioUrl && segments.length > 0) {
+      let targetIdx = segments.findIndex(s => clamped >= s.start_time && clamped < s.end_time);
+      if (targetIdx === -1) targetIdx = segments.findIndex(s => s.start_time >= clamped);
+      if (targetIdx === -1) targetIdx = 0;
+      speakSegment(targetIdx);
     }
   };
 
@@ -133,15 +323,23 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
     if (audioRef.current) {
       audioRef.current.playbackRate = nextRate;
     }
+    // If currently speaking in TTS, re-trigger current segment with new rate
+    if (isPlaying && !audioUrl && currentSpeakingIndexRef.current !== null) {
+      speakSegment(currentSpeakingIndexRef.current);
+    }
   };
 
   const toggleMute = () => {
-    setIsMuted(!isMuted);
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
     if (audioRef.current) {
-      audioRef.current.muted = !isMuted;
+      audioRef.current.muted = nextMuted;
     }
-    if (!isMuted && typeof window !== 'undefined' && window.speechSynthesis) {
+    if (nextMuted && typeof window !== 'undefined' && window.speechSynthesis) {
       window.speechSynthesis.cancel();
+      isSpeakingRef.current = false;
+    } else if (!nextMuted && isPlaying && !audioUrl && currentSpeakingIndexRef.current !== null) {
+      speakSegment(currentSpeakingIndexRef.current);
     }
   };
 
@@ -156,11 +354,11 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
       <div className="mb-3">
         <div className="flex items-center justify-between text-xs font-mono text-[#8b8ba3] mb-1.5">
           <span className="text-[#a29bfe] font-semibold">{formatTime(currentTime)}</span>
-          <div className="flex items-center gap-1.5 text-[11px] text-[#6b6b8a]">
+          <div className="flex items-center gap-2 text-[11px] text-[#6b6b8a]">
             {isPlaying && (
-              <span className="flex items-center gap-1 text-emerald-400">
+              <span className="flex items-center gap-1.5 text-emerald-400 font-sans font-medium">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                Playing
+                {currentSpeaker ? `Speaking: ${currentSpeaker}` : 'Playing'}
               </span>
             )}
             <span>/</span>
@@ -169,10 +367,9 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
         </div>
 
         {/* Custom Scrubber Bar */}
-        <div className="relative h-2 bg-[#1e233d] rounded-full overflow-hidden cursor-pointer group">
-          {/* Visual pseudo-waveform */}
+        <div className="relative h-2.5 bg-[#1e233d] rounded-full overflow-hidden cursor-pointer group">
           <div
-            className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-[#6C5CE7] to-[#a29bfe] rounded-full transition-all duration-150"
+            className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-[#6C5CE7] to-[#a29bfe] rounded-full transition-all duration-100"
             style={{ width: `${progress}%` }}
           />
           <input
@@ -189,23 +386,25 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
       </div>
 
       {/* Player Controls Bar */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Left: Skip & Play Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={() => skipSeconds(-5)}
             title="Rewind 5s"
+            type="button"
             suppressHydrationWarning
             className="p-2 rounded-lg text-[#8b8ba3] hover:text-white hover:bg-[#1f243d] transition-colors"
           >
-            <RotateCcw size={18} />
+            <RotateCcw size={17} />
           </button>
 
           <button
             onClick={togglePlay}
+            type="button"
             suppressHydrationWarning
             className="w-11 h-11 rounded-full bg-[#6C5CE7] hover:bg-[#5a4bd6] flex items-center justify-center text-white shadow-lg shadow-[#6C5CE7]/30 transition-all hover:scale-105 active:scale-95"
-            title={isPlaying ? 'Pause' : 'Play'}
+            title={isPlaying ? 'Pause Narration' : 'Play Transcript to Voice'}
           >
             {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}
           </button>
@@ -213,24 +412,38 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
           <button
             onClick={() => skipSeconds(5)}
             title="Forward 5s"
+            type="button"
             suppressHydrationWarning
             className="p-2 rounded-lg text-[#8b8ba3] hover:text-white hover:bg-[#1f243d] transition-colors"
           >
-            <RotateCw size={18} />
+            <RotateCw size={17} />
           </button>
         </div>
 
-        {/* Center: AI Voiceover Indicator */}
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-[#1a1d30] border border-[#2b3052] rounded-full text-xs text-[#a29bfe]">
-          <Sparkles size={13} className="text-[#6C5CE7]" />
-          <span>Sync &amp; Speech Narration Active</span>
+        {/* Center: AI Voice Status Badge */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setVoiceVoiceover(!voiceVoiceover)}
+            type="button"
+            title="Toggle AI Voiceover Narration"
+            suppressHydrationWarning
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+              voiceVoiceover
+                ? 'bg-[#6C5CE7]/15 border-[#6C5CE7]/40 text-[#a29bfe]'
+                : 'bg-[#181c33] border-[#293054] text-[#6b7499]'
+            }`}
+          >
+            <Sparkles size={13} className={voiceVoiceover ? 'text-[#6C5CE7]' : 'text-[#6b7499]'} />
+            <span>AI Voice: {voiceVoiceover ? 'Active (Multi-Speaker)' : 'Off (Muted)'}</span>
+          </button>
         </div>
 
-        {/* Right: Speed, Volume, Mute */}
-        <div className="flex items-center gap-2">
+        {/* Right: Speed, Volume Slider, Mute */}
+        <div className="flex items-center gap-3">
           {/* Playback speed toggle */}
           <button
             onClick={cyclePlaybackRate}
+            type="button"
             suppressHydrationWarning
             className="px-2.5 py-1 rounded-md text-xs font-semibold bg-[#1e233d] hover:bg-[#282f52] text-[#e0e0e0] transition-colors border border-[#313860]"
             title="Toggle playback speed"
@@ -238,15 +451,40 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
             {playbackRate}x
           </button>
 
-          {/* Volume toggle */}
-          <button
-            onClick={toggleMute}
-            suppressHydrationWarning
-            className="p-2 rounded-lg text-[#8b8ba3] hover:text-white hover:bg-[#1f243d] transition-colors"
-            title={isMuted ? 'Unmute' : 'Mute'}
-          >
-            {isMuted ? <VolumeX size={18} className="text-red-400" /> : <Volume2 size={18} />}
-          </button>
+          {/* Volume control */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleMute}
+              type="button"
+              suppressHydrationWarning
+              className="p-1.5 rounded-lg text-[#8b8ba3] hover:text-white hover:bg-[#1f243d] transition-colors"
+              title={isMuted ? 'Unmute' : 'Mute'}
+            >
+              {isMuted ? (
+                <VolumeX size={17} className="text-red-400" />
+              ) : volume > 0.5 ? (
+                <Volume2 size={17} />
+              ) : (
+                <Volume1 size={17} />
+              )}
+            </button>
+
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={isMuted ? 0 : volume}
+              onChange={(e) => {
+                const newVol = parseFloat(e.target.value);
+                setVolume(newVol);
+                if (isMuted && newVol > 0) setIsMuted(false);
+              }}
+              suppressHydrationWarning
+              className="w-16 h-1 bg-[#252b4a] rounded-lg appearance-none cursor-pointer accent-[#6C5CE7]"
+              title={`Volume: ${Math.round((isMuted ? 0 : volume) * 100)}%`}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { usePlayerStore } from '@/lib/store';
 import { useMeeting } from '@/hooks/useMeetings';
 import { useTranscript } from '@/hooks/useTranscript';
 import AudioPlayer from '@/components/player/AudioPlayer';
@@ -60,6 +61,16 @@ export default function MeetingDetailPage() {
   const { data: meeting, isLoading } = useMeeting(meetingId);
   const { data: transcriptSegments } = useTranscript(meetingId);
   const { showToast } = useToast();
+
+  // Reset audio player state whenever switching meetings
+  useEffect(() => {
+    usePlayerStore.getState().setCurrentTime(0);
+    usePlayerStore.getState().setIsPlaying(false);
+    usePlayerStore.getState().setActiveSegmentId(null);
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+  }, [meetingId]);
 
   const [activeTab, setActiveTab] = useState<'summary' | 'actions' | 'ask'>('summary');
   const [isEditOpen, setIsEditOpen] = useState(false);
