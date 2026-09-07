@@ -128,4 +128,19 @@ export const deleteHighlight = async (id: number): Promise<void> => {
   await api.delete(`/api/highlights/${id}`);
 };
 
+// Ask Fred AI Assistant
+export const askMeeting = async (meetingId: number, question: string): Promise<{ answer: string }> => {
+  const { data } = await api.post('/api/ask', { meeting_id: meetingId, question });
+  return data;
+};
+
+// Export Meeting Transcript / Summary
+export const exportMeeting = async (meetingId: number, format: 'markdown' | 'txt' = 'markdown'): Promise<string> => {
+  const { data } = await api.get(`/api/meetings/${meetingId}/export`, {
+    params: { format },
+    responseType: 'text',
+  });
+  return data;
+};
+
 export default api;

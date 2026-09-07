@@ -3,11 +3,11 @@
 import Link from 'next/link';
 import type { Meeting } from '@/types';
 import Badge from '@/components/ui/Badge';
-import { Clock, Users, Calendar } from 'lucide-react';
+import { Clock, Calendar, Volume2, ArrowRight } from 'lucide-react';
 
 function formatDuration(seconds: number): string {
   const mins = Math.floor(seconds / 60);
-  if (mins < 60) return `${mins} min`;
+  if (mins < 60) return `${mins}m`;
   const hrs = Math.floor(mins / 60);
   const remainMins = mins % 60;
   return `${hrs}h ${remainMins}m`;
@@ -15,7 +15,7 @@ function formatDuration(seconds: number): string {
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 function formatTime(dateStr: string): string {
@@ -31,66 +31,87 @@ interface MeetingCardProps {
 
 export default function MeetingCard({ meeting }: MeetingCardProps) {
   const borderColor = SPEAKER_COLORS[(meeting.id - 1) % SPEAKER_COLORS.length];
+  const participants = meeting.participants || [];
+  const tags = meeting.tags || [];
 
   return (
-    <Link href={`/meetings/${meeting.id}`}>
+    <Link href={`/meetings/${meeting.id}`} className="block group">
       <div
-        className="bg-[#16213e] rounded-lg p-5 border border-[#2a2a4a] hover:bg-[#1a1a3e] transition-all duration-200 cursor-pointer group"
+        className="bg-[#141829] rounded-xl p-5 border border-[#232845] hover:border-[#6C5CE7]/50 hover:bg-[#181d33] transition-all duration-200 shadow-md hover:shadow-xl hover:-translate-y-0.5 flex flex-col justify-between h-full"
         style={{ borderLeftWidth: '4px', borderLeftColor: borderColor }}
       >
-        {/* Title and Duration */}
-        <div className="flex items-start justify-between mb-2">
-          <h3 className="text-[#e0e0e0] font-semibold text-sm group-hover:text-white transition-colors line-clamp-1 flex-1 mr-2">
-            {meeting.title}
-          </h3>
-          <Badge color={borderColor}>
-            <Clock size={12} className="mr-1" />
-            {formatDuration(meeting.duration_seconds)}
-          </Badge>
-        </div>
-
-        {/* Date */}
-        <div className="flex items-center gap-2 mb-3 text-[#8b8ba3] text-xs">
-          <Calendar size={13} />
-          <span>{formatDate(meeting.date)} at {formatTime(meeting.date)}</span>
-        </div>
-
-        {/* Summary Snippet */}
-        {meeting.summary_snippet && (
-          <p className="text-[#8b8ba3] text-xs leading-relaxed line-clamp-2 mb-3">
-            {meeting.summary_snippet}
-          </p>
-        )}
-
-        {/* Participants and Tags */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            {meeting.participants.slice(0, 3).map((p, i) => (
-              <div
-                key={p.id}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-semibold border-2 border-[#16213e]"
-                style={{
-                  backgroundColor: SPEAKER_COLORS[i % SPEAKER_COLORS.length],
-                  marginLeft: i > 0 ? '-6px' : '0',
-                  zIndex: 3 - i,
-                }}
-                title={p.name}
-              >
-                {p.name.split(' ').map(n => n[0]).join('')}
-              </div>
-            ))}
-            {meeting.participants.length > 3 && (
-              <div className="w-7 h-7 rounded-full bg-[#2a2a4a] flex items-center justify-center text-[#8b8ba3] text-[10px] font-medium border-2 border-[#16213e]" style={{ marginLeft: '-6px' }}>
-                +{meeting.participants.length - 3}
-              </div>
-            )}
+        <div>
+          {/* Header Row: Title & Duration */}
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <h3 className="text-white font-semibold text-sm group-hover:text-[#a29bfe] transition-colors line-clamp-1 flex-1">
+              {meeting.title}
+            </h3>
+            <span className="flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#1e233d] text-[#a29bfe] border border-[#2d345a] flex-shrink-0">
+              <Clock size={11} />
+              {formatDuration(meeting.duration_seconds)}
+            </span>
           </div>
-          <div className="flex items-center gap-1.5">
-            {meeting.tags.slice(0, 2).map((tag) => (
-              <Badge key={tag.id} variant="outline" className="text-[10px]">
-                {tag.name}
-              </Badge>
-            ))}
+
+          {/* Date & Time */}
+          <div className="flex items-center gap-2 mb-3 text-[#8b8ba3] text-xs">
+            <Calendar size={12} className="text-[#6C5CE7]" />
+            <span>{formatDate(meeting.date)} at {formatTime(meeting.date)}</span>
+          </div>
+
+          {/* Summary Preview */}
+          <p className="text-xs text-[#9aa0bd] leading-relaxed line-clamp-2 mb-4">
+            {meeting.summary_snippet || 'Discussion notes, transcript, and key action items generated.'}
+          </p>
+        </div>
+
+        <div>
+          {/* Tags */}
+          {tags.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1 mb-3.5">
+              {tags.slice(0, 3).map((tag) => (
+                <span
+                  key={tag.id}
+                  className="text-[10px] px-2 py-0.5 rounded bg-[#1e233d] text-[#8b8ba3] border border-[#2c3254]"
+                >
+                  #{tag.name}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Footer: Attendees & Action */}
+          <div className="flex items-center justify-between pt-3 border-t border-[#1e233d]">
+            {/* Avatar Stack */}
+            <div className="flex items-center">
+              {participants.slice(0, 4).map((p, i) => (
+                <div
+                  key={p.id}
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold border-2 border-[#141829]"
+                  style={{
+                    backgroundColor: SPEAKER_COLORS[i % SPEAKER_COLORS.length],
+                    marginLeft: i > 0 ? '-6px' : '0',
+                    zIndex: 4 - i,
+                  }}
+                  title={p.name}
+                >
+                  {p.name.slice(0, 1).toUpperCase()}
+                </div>
+              ))}
+              {participants.length > 4 && (
+                <div
+                  className="w-6 h-6 rounded-full bg-[#202642] flex items-center justify-center text-[#8b8ba3] text-[9px] font-medium border-2 border-[#141829]"
+                  style={{ marginLeft: '-6px' }}
+                >
+                  +{participants.length - 4}
+                </div>
+              )}
+            </div>
+
+            {/* View prompt */}
+            <span className="text-xs text-[#6C5CE7] group-hover:text-[#a29bfe] font-medium flex items-center gap-1 transition-colors">
+              <span>View</span>
+              <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+            </span>
           </div>
         </div>
       </div>

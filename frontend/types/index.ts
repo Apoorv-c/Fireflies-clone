@@ -12,6 +12,7 @@ export interface Meeting {
   speakers?: Speaker[];
   summary?: Summary | null;
   action_items?: ActionItem[];
+  transcript_segments?: TranscriptSegment[];
   speaker_count?: number;
   segment_count?: number;
   summary_snippet?: string | null;
