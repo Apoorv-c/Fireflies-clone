@@ -496,27 +496,27 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
       </div>
 
       {/* Player Controls Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-3">
         {/* Left: Skip & Play Controls */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
           <button
             onClick={() => skipSeconds(-5)}
             title="Rewind 5s"
             type="button"
             suppressHydrationWarning
-            className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="p-1.5 sm:p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
           >
-            <RotateCcw size={17} />
+            <RotateCcw size={16} />
           </button>
 
           <button
             onClick={togglePlay}
             type="button"
             suppressHydrationWarning
-            className="w-10 h-10 rounded-full bg-[#6C5CE7] hover:bg-[#5a4bd6] flex items-center justify-center text-white shadow-xs hover:shadow transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#6C5CE7] hover:bg-[#5a4bd6] flex items-center justify-center text-white shadow-xs hover:shadow transition-all hover:scale-105 active:scale-95 cursor-pointer"
             title={isPlaying ? 'Pause Narration' : 'Play Transcript to Voice'}
           >
-            {isPlaying ? <Pause size={18} /> : <Play size={18} className="ml-0.5" />}
+            {isPlaying ? <Pause size={17} /> : <Play size={17} className="ml-0.5" />}
           </button>
 
           <button
@@ -524,45 +524,46 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
             title="Forward 5s"
             type="button"
             suppressHydrationWarning
-            className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="p-1.5 sm:p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
           >
-            <RotateCw size={17} />
+            <RotateCw size={16} />
           </button>
         </div>
 
         {/* Center: AI Voice Status Badge */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <button
             onClick={toggleVoiceover}
             type="button"
             title="Toggle AI Voiceover Narration"
             suppressHydrationWarning
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-medium border transition-all cursor-pointer ${
               voiceVoiceover
                 ? 'bg-[#6C5CE7]/10 border-[#6C5CE7]/30 text-[#6C5CE7]'
                 : 'bg-slate-100 border-slate-200 text-slate-500'
             }`}
           >
-            <Sparkles size={13} className={voiceVoiceover ? 'text-[#6C5CE7]' : 'text-slate-400'} />
-            <span>AI Voice: {voiceVoiceover ? 'Active (Multi-Speaker)' : 'Off (Muted)'}</span>
+            <Sparkles size={12} className={voiceVoiceover ? 'text-[#6C5CE7]' : 'text-slate-400'} />
+            <span className="hidden sm:inline">AI Voice: {voiceVoiceover ? 'Active (Multi-Speaker)' : 'Off (Muted)'}</span>
+            <span className="sm:hidden">{voiceVoiceover ? 'AI Voice On' : 'AI Muted'}</span>
           </button>
         </div>
 
         {/* Right: Speed, Volume Slider, Mute */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Playback speed toggle */}
           <button
             onClick={cyclePlaybackRate}
             type="button"
             suppressHydrationWarning
-            className="px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 hover:bg-slate-200/80 text-slate-700 transition-colors border border-slate-200 cursor-pointer min-w-[38px] text-center"
+            className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md text-[11px] sm:text-xs font-semibold bg-slate-100 hover:bg-slate-200/80 text-slate-700 transition-colors border border-slate-200 cursor-pointer min-w-[34px] sm:min-w-[38px] text-center"
             title={`Current speed: ${playbackRate}x. Click to change.`}
           >
             {playbackRate}x
           </button>
 
           {/* Volume control */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={toggleMute}
               type="button"
@@ -571,15 +572,15 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
               title={isMuted || volume === 0 ? 'Unmute' : 'Mute'}
             >
               {isMuted || volume === 0 ? (
-                <VolumeX size={17} className="text-rose-500" />
+                <VolumeX size={16} className="text-rose-500" />
               ) : volume <= 0.4 ? (
-                <Volume1 size={17} className="text-slate-600" />
+                <Volume1 size={16} className="text-slate-600" />
               ) : (
-                <Volume2 size={17} className="text-slate-700" />
+                <Volume2 size={16} className="text-slate-700" />
               )}
             </button>
 
-            <div className="relative flex items-center">
+            <div className="relative hidden sm:flex items-center">
               <input
                 type="range"
                 min="0"
@@ -592,7 +593,7 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
                 style={{
                   background: `linear-gradient(to right, #6C5CE7 0%, #6C5CE7 ${volPercent}%, #e2e8f0 ${volPercent}%, #e2e8f0 100%)`
                 }}
-                className="w-18 h-1.5 rounded-lg appearance-none cursor-pointer accent-[#6C5CE7] transition-all"
+                className="w-16 sm:w-18 h-1.5 rounded-lg appearance-none cursor-pointer accent-[#6C5CE7] transition-all"
                 title={`Volume: ${volPercent}%`}
               />
             </div>

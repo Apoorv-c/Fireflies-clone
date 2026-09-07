@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Search, Bell, Video, ChevronDown, Sparkles, CheckSquare, Bot, ArrowRight } from 'lucide-react';
+import { Search, Bell, Video, ChevronDown, Sparkles, CheckSquare, Bot, ArrowRight, Menu } from 'lucide-react';
 import { useUIStore } from '@/lib/store';
 import { useRouter, usePathname } from 'next/navigation';
 import UserAvatar from '@/components/ui/UserAvatar';
 
 export default function TopBar() {
-  const { searchQuery, setSearchQuery, setIsCreateModalOpen, setIsAccountModalOpen } = useUIStore();
+  const { searchQuery, setSearchQuery, setIsCreateModalOpen, setIsAccountModalOpen, setMobileMenuOpen } = useUIStore();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -88,35 +88,44 @@ export default function TopBar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-slate-200/80 px-7 py-3">
-      <div className="flex items-center justify-between gap-4">
-        {/* Left: Page Title */}
-        <div className="flex items-center gap-2">
-          <h1 className="text-base font-semibold text-slate-800 tracking-tight">
+    <header className="sticky top-0 z-40 bg-white border-b border-slate-200/80 px-3.5 sm:px-7 py-2.5 sm:py-3">
+      <div className="flex items-center justify-between gap-2 sm:gap-4">
+        {/* Left: Mobile Drawer Trigger & Page Title */}
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            aria-label="Open navigation menu"
+            title="Open navigation menu"
+            className="p-1.5 -ml-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 md:hidden cursor-pointer flex-shrink-0"
+          >
+            <Menu size={20} />
+          </button>
+          <h1 className="text-sm sm:text-base font-semibold text-slate-800 tracking-tight truncate">
             {getPageTitle()}
           </h1>
         </div>
 
         {/* Center: Search Box with Ctrl + K */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-lg mx-4">
+        <form onSubmit={handleSearch} className="flex-1 max-w-lg mx-1.5 sm:mx-4">
           <div className="relative">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={15} className="absolute left-3 sm:left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <input
               type="text"
               placeholder="Search by title or keyword"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               suppressHydrationWarning
-              className="w-full pl-9 pr-16 py-1.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/30 focus:border-[#6C5CE7] transition-all"
+              className="w-full pl-8 sm:pl-9 pr-3 sm:pr-16 py-1.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/30 focus:border-[#6C5CE7] transition-all"
             />
-            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 bg-white border border-slate-200 rounded shadow-2xs pointer-events-none">
+            <kbd className="hidden sm:block absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 bg-white border border-slate-200 rounded shadow-2xs pointer-events-none">
               Ctrl + K
             </kbd>
           </div>
         </form>
 
         {/* Right Actions: Working Notifications Bell & Capture */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
           {/* Notification Bell with Working Dropdown */}
           <div className="relative" ref={notifRef}>
             <button

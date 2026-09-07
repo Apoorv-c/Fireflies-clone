@@ -26,9 +26,9 @@ export default function AppLayoutClient({
   return (
     <div suppressHydrationWarning className="flex min-h-screen bg-[#ffffff]">
       {!isSettings && <Sidebar />}
-      <div suppressHydrationWarning className={`flex-1 ${isSettings ? 'ml-0' : 'ml-[56px]'} min-w-0 min-h-screen flex flex-col bg-[#ffffff]`}>
+      <div suppressHydrationWarning className={`flex-1 ${isSettings ? 'ml-0' : 'ml-0 md:ml-[56px]'} min-w-0 min-h-screen flex flex-col bg-[#ffffff]`}>
         {!isSettings && <TopBar />}
-        <main suppressHydrationWarning className={`flex-1 ${isSettings ? 'p-0' : 'p-6 md:p-8'}`}>{children}</main>
+        <main suppressHydrationWarning className={`flex-1 ${isSettings ? 'p-0' : 'p-3.5 sm:p-6 md:p-8 pb-20 md:pb-8'}`}>{children}</main>
       </div>
 
       {/* Global Modals for Pro Features, Live Capture & Help */}
@@ -42,7 +42,7 @@ export default function AppLayoutClient({
         title="Help and Support"
         suppressHydrationWarning
         onClick={() => setIsHelpOpen(true)}
-        className="fixed right-6 bottom-6 w-9 h-9 rounded-full bg-white hover:bg-slate-50 text-slate-900 border border-slate-200/90 flex items-center justify-center font-bold text-sm shadow-[0_4px_14px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.16)] transition-all duration-150 hover:scale-105 active:scale-95 z-40 cursor-pointer"
+        className="fixed right-4 bottom-18 md:right-6 md:bottom-6 w-9 h-9 rounded-full bg-white hover:bg-slate-50 text-slate-900 border border-slate-200/90 flex items-center justify-center font-bold text-sm shadow-[0_4px_14px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.16)] transition-all duration-150 hover:scale-105 active:scale-95 z-40 cursor-pointer"
       >
         ?
       </button>

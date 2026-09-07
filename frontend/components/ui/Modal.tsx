@@ -42,15 +42,15 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 overflow-y-auto"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-2.5 sm:p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
         className={`${maxWidth} w-full my-auto bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
-          <h2 className="text-base font-bold text-slate-900 tracking-tight">{title}</h2>
+        <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-100 bg-slate-50/80">
+          <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">{title}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -59,7 +59,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
             <X size={18} />
           </button>
         </div>
-        <div className="p-6 max-h-[82vh] overflow-y-auto text-slate-800">{children}</div>
+        <div className="p-4 sm:p-6 max-h-[85vh] overflow-y-auto text-slate-800">{children}</div>
       </div>
     </div>,
     document.body

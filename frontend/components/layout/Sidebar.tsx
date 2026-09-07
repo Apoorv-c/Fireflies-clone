@@ -18,7 +18,9 @@ import {
   User,
   Camera,
   Crown,
-  ChevronRight
+  ChevronRight,
+  X,
+  Plus
 } from 'lucide-react';
 import { useUIStore } from '@/lib/store';
 import CreateMeetingModal from '@/components/meetings/CreateMeetingModal';
@@ -114,6 +116,8 @@ export default function Sidebar() {
     userProfile,
     isAccountModalOpen,
     setIsAccountModalOpen,
+    mobileMenuOpen,
+    setMobileMenuOpen,
   } = useUIStore();
 
   useEffect(() => {
@@ -130,7 +134,7 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside suppressHydrationWarning className="fixed left-0 top-0 h-screen w-[56px] bg-white border-r border-slate-200/80 flex flex-col items-center py-3 z-50 select-none shadow-[1px_0_4px_rgba(0,0,0,0.02)]">
+      <aside suppressHydrationWarning className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-[56px] bg-white border-r border-slate-200/80 items-center py-3 z-50 select-none shadow-[1px_0_4px_rgba(0,0,0,0.02)]">
         {/* Workspace Brand / User Account Avatar */}
         <div className="relative mb-4" ref={accountMenuRef}>
           <button
@@ -338,6 +342,181 @@ export default function Sidebar() {
           </Link>
         </div>
       </aside>
+
+      {/* Mobile Bottom Navigation Dock */}
+      <nav
+        aria-label="Mobile navigation"
+        suppressHydrationWarning
+        className="flex md:hidden fixed bottom-0 left-0 right-0 h-14 bg-white/95 backdrop-blur-md border-t border-slate-200/90 z-40 px-2 items-center justify-around shadow-[0_-2px_12px_rgba(0,0,0,0.05)] select-none"
+      >
+        <Link
+          href="/"
+          suppressHydrationWarning
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-colors ${
+            pathname === '/' ? 'text-[#6C5CE7] font-semibold' : 'text-slate-500 hover:text-slate-900'
+          }`}
+        >
+          <Home size={18} strokeWidth={pathname === '/' ? 2.4 : 1.8} />
+          <span className="text-[10px] mt-0.5 font-medium">Home</span>
+        </Link>
+
+        <Link
+          href="/meetings"
+          suppressHydrationWarning
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-colors ${
+            pathname.startsWith('/meetings') ? 'text-[#6C5CE7] font-semibold' : 'text-slate-500 hover:text-slate-900'
+          }`}
+        >
+          <Video size={18} strokeWidth={pathname.startsWith('/meetings') ? 2.4 : 1.8} />
+          <span className="text-[10px] mt-0.5 font-medium">Notebook</span>
+        </Link>
+
+        {/* Center Floating Plus Capture Button */}
+        <button
+          type="button"
+          onClick={() => setIsCreateModalOpen(true)}
+          suppressHydrationWarning
+          className="w-10 h-10 -mt-4 rounded-full bg-[#6C5CE7] hover:bg-[#5a4bd6] text-white flex items-center justify-center shadow-lg active:scale-95 transition-all cursor-pointer border-2 border-white ring-2 ring-purple-100"
+          title="Capture / Schedule Meeting"
+        >
+          <Plus size={20} strokeWidth={2.5} />
+        </button>
+
+        <Link
+          href="/tasks"
+          suppressHydrationWarning
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-colors ${
+            pathname === '/tasks' ? 'text-[#6C5CE7] font-semibold' : 'text-slate-500 hover:text-slate-900'
+          }`}
+        >
+          <TasksIcon size={18} />
+          <span className="text-[10px] mt-0.5 font-medium">Tasks</span>
+        </Link>
+
+        <button
+          type="button"
+          onClick={() => setIsAccountModalOpen(true)}
+          suppressHydrationWarning
+          className="flex flex-col items-center justify-center py-1 px-3 rounded-xl text-slate-500 hover:text-slate-900 cursor-pointer"
+        >
+          <UserAvatar size="sm" showProBadge={true} />
+          <span className="text-[10px] mt-0.5 text-slate-600 font-medium">Account</span>
+        </button>
+      </nav>
+
+      {/* Mobile Slide-out Drawer */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[100] md:hidden" suppressHydrationWarning>
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+
+          {/* Drawer Panel */}
+          <div className="relative w-72 max-w-[85vw] h-full bg-white shadow-2xl flex flex-col justify-between p-4 z-10 animate-in slide-in-from-left duration-200">
+            <div>
+              {/* Drawer Top Header with Profile */}
+              <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+                <div
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setIsAccountModalOpen(true);
+                  }}
+                  className="flex items-center gap-3 cursor-pointer group"
+                >
+                  <UserAvatar size="md" showProBadge={true} />
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-900 truncate">{userProfile.name}</p>
+                    <p className="text-[10px] text-slate-400 truncate">{userProfile.email}</p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-label="Close navigation menu"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Navigation links */}
+              <div className="space-y-1 py-3 overflow-y-auto max-h-[calc(100vh-180px)]">
+                {mainNavItems.map((item) => {
+                  const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+                  const Icon = item.icon;
+
+                  if (item.label === 'Live Capture') {
+                    return (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          if (!isPremium) {
+                            setUpgradeModalFeature('Live Capture');
+                            setIsUpgradeModalOpen(true);
+                          } else {
+                            setIsLiveCaptureOpen(true);
+                          }
+                        }}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-colors text-left ${
+                          isPremium
+                            ? 'bg-purple-50 text-[#6C5CE7] font-semibold'
+                            : 'text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        <Icon size={18} className="text-[#6C5CE7]" />
+                        <span className="flex-1">Live Capture</span>
+                        {!isPremium && <ProCrownBadge className="w-2 h-2" />}
+                      </button>
+                    );
+                  }
+
+                  return (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-colors ${
+                        isActive
+                          ? 'bg-purple-50 text-[#6C5CE7] font-semibold'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      }`}
+                    >
+                      <Icon size={18} className={isActive ? 'text-[#6C5CE7]' : 'text-slate-400'} />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Bottom Actions inside Drawer */}
+            <div className="pt-3 border-t border-slate-100 space-y-1">
+              <Link
+                href="/settings?tab=account"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                <User size={17} className="text-[#6C5CE7]" />
+                <span>Account & Profile</span>
+              </Link>
+
+              <Link
+                href="/settings"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                <Settings size={17} className="text-slate-400" />
+                <span>Workspace Settings</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       <CreateMeetingModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
       <AccountModal isOpen={isAccountModalOpen} onClose={() => setIsAccountModalOpen(false)} />

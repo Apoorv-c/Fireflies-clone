@@ -31,6 +31,7 @@ interface UIState {
   isLiveCaptureOpen: boolean;
   isUpgradeModalOpen: boolean;
   isAccountModalOpen: boolean;
+  mobileMenuOpen: boolean;
   upgradeModalFeature: string;
   isPremium: boolean;
   createModalInitialTab: 'schedule' | 'upload';
@@ -38,6 +39,7 @@ interface UIState {
   setSearchQuery: (query: string) => void;
   setTranscriptSearchQuery: (query: string) => void;
   setSidebarOpen: (open: boolean) => void;
+  setMobileMenuOpen: (open: boolean) => void;
   setIsCreateModalOpen: (open: boolean, initialTab?: 'schedule' | 'upload') => void;
   setIsLiveCaptureOpen: (open: boolean) => void;
   setIsUpgradeModalOpen: (open: boolean) => void;
@@ -66,6 +68,7 @@ export const useUIStore = create<UIState>((set) => ({
   isLiveCaptureOpen: false,
   isUpgradeModalOpen: false,
   isAccountModalOpen: false,
+  mobileMenuOpen: false,
   upgradeModalFeature: 'Live Capture',
   isPremium: false,
   createModalInitialTab: 'schedule',
@@ -83,6 +86,7 @@ export const useUIStore = create<UIState>((set) => ({
   setSearchQuery: (query) => set({ searchQuery: query }),
   setTranscriptSearchQuery: (query) => set({ transcriptSearchQuery: query }),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
+  setMobileMenuOpen: (open) => set({ mobileMenuOpen: open }),
   setIsCreateModalOpen: (open, initialTab) => set({
     isCreateModalOpen: open,
     ...(initialTab ? { createModalInitialTab: initialTab } : {})

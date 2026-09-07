@@ -309,7 +309,7 @@ export default function SettingsPage() {
       )}
 
       {/* 2. SETTINGS HEADER BAR */}
-      <header className="h-14 bg-white border-b border-slate-200/80 px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+      <header className="h-14 bg-white border-b border-slate-200/80 px-3.5 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -322,7 +322,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Centered Search settings input */}
-        <div className="relative w-80 sm:w-96">
+        <div className="relative w-44 sm:w-80 md:w-96">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
@@ -341,21 +341,21 @@ export default function SettingsPage() {
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
           >
             <MessageSquare size={15} className="text-slate-500" />
-            <span>Feedback</span>
+            <span className="hidden sm:inline">Feedback</span>
           </button>
         </div>
       </header>
 
       {/* 3. MAIN SPLIT LAYOUT */}
-      <div className="flex-1 flex max-w-[1440px] w-full mx-auto">
+      <div className="flex-1 flex flex-col md:flex-row max-w-[1440px] w-full mx-auto">
         {/* LEFT SETTINGS NAVIGATION SIDEBAR */}
-        <aside className="w-60 flex-shrink-0 border-r border-slate-200/80 bg-white p-4 flex flex-col justify-between min-h-[calc(100vh-70px)]">
+        <aside className="w-full md:w-60 flex-shrink-0 border-b md:border-b-0 md:border-r border-slate-200/80 bg-white p-3 sm:p-4 flex flex-col justify-between md:min-h-[calc(100vh-70px)]">
           <div>
             {/* User Account / Workspace Dropdown with Plan Switcher */}
             <div
               onClick={() => setActiveTab('account')}
               title="Click to manage Account & Profile"
-              className="flex items-center justify-between p-1.5 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group border border-transparent hover:border-slate-200"
+              className="flex items-center justify-between p-1.5 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group border border-transparent hover:border-slate-200 mb-3"
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 <UserAvatar size="sm" showProBadge={true} />
@@ -372,11 +372,11 @@ export default function SettingsPage() {
                   </p>
                 </div>
               </div>
-              <ChevronDown size={14} className="text-slate-400 flex-shrink-0 ml-1 group-hover:text-slate-600" />
+              <ChevronDown size={14} className="text-slate-400 group-hover:text-slate-600 transition-colors" />
             </div>
 
-            {/* Segmented Control [ Personal | Team ] */}
-            <div className="bg-slate-100/90 p-1 rounded-xl flex items-center my-3 text-xs font-medium border border-slate-200/40">
+            {/* Scope Switcher: Personal vs Team */}
+            <div className="flex items-center bg-slate-100 p-0.5 rounded-xl mb-3 text-xs">
               <button
                 type="button"
                 onClick={() => setCurrentScope('personal')}
@@ -403,7 +403,7 @@ export default function SettingsPage() {
 
             {/* Navigation Menu List */}
             {currentScope === 'personal' ? (
-              <nav className="space-y-0.5">
+              <nav className="flex md:flex-col gap-1 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 md:space-y-0.5 scrollbar-none">
                 {[
                   { id: 'account', label: 'Account & Profile', icon: User },
                   { id: 'recording', label: 'Recording & Privacy', icon: Video },
@@ -422,9 +422,9 @@ export default function SettingsPage() {
                       key={item.id}
                       type="button"
                       onClick={() => setActiveTab(item.id as any)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all text-left cursor-pointer ${
+                      className={`whitespace-nowrap flex-shrink-0 md:flex-shrink md:w-full flex items-center gap-2 md:gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all text-left cursor-pointer ${
                         isActive
-                          ? 'bg-slate-100 text-slate-900 font-semibold'
+                          ? 'bg-purple-50 md:bg-slate-100 text-[#6C5CE7] md:text-slate-900 font-semibold border border-purple-200 md:border-transparent'
                           : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                       }`}
                     >
@@ -452,7 +452,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Bottom Sidebar Items */}
-          <div className="space-y-2 pt-4 border-t border-slate-100">
+          <div className="hidden md:block space-y-2 pt-4 border-t border-slate-100">
             <button
               type="button"
               onClick={() => setIsReferralModalOpen(true)}
@@ -492,7 +492,7 @@ export default function SettingsPage() {
         </aside>
 
         {/* RIGHT SETTINGS CONTENT PANEL */}
-        <main className="flex-1 p-6 md:p-8 overflow-y-auto max-w-4xl pb-32">
+        <main className="flex-1 p-3.5 sm:p-6 md:p-8 overflow-y-auto max-w-4xl pb-32">
           {/* TAB 0: ACCOUNT & PROFILE (Blank photo & Account section) */}
           {activeTab === 'account' && (
             <AccountSettingsTab />
