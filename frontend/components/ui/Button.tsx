@@ -34,6 +34,7 @@ export default function Button({
 }: ButtonProps) {
   return (
     <button
+      suppressHydrationWarning
       className={`inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200 
         ${variantClasses[variant]} ${sizeClasses[size]} 
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
