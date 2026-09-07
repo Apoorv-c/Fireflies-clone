@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -12,7 +13,13 @@ interface ModalProps {
 }
 
 export default function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-lg' }: ModalProps) {
+  const [mounted, setMounted] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -21,6 +28,8 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
     if (isOpen) {
       document.addEventListener('keydown', handleEsc);
       document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
     }
     return () => {
       document.removeEventListener('keydown', handleEsc);
@@ -28,28 +37,29 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto"
       onClick={(e) => {
         if (e.target === overlayRef.current) onClose();
       }}
     >
-      <div className={`${maxWidth} w-full mx-4 bg-[#16213e] rounded-xl border border-[#2a2a4a] shadow-2xl`}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#2a2a4a]">
-          <h2 className="text-lg font-semibold text-[#e0e0e0]">{title}</h2>
+      <div className={`${maxWidth} w-full my-auto bg-[#141829] rounded-2xl border border-[#2d345a] shadow-2xl overflow-hidden animate-slide-in`}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#232845] bg-[#111424]">
+          <h2 className="text-base font-bold text-white tracking-tight">{title}</h2>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-[#8b8ba3] hover:text-[#e0e0e0] hover:bg-[#2a2a4a] transition-colors"
+            className="p-1.5 rounded-lg text-[#8b8ba3] hover:text-white hover:bg-[#202540] transition-colors"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
-        <div className="px-6 py-4">{children}</div>
+        <div className="p-6 max-h-[80vh] overflow-y-auto">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

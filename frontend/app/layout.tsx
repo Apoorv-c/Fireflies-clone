@@ -23,11 +23,11 @@ export default function RootLayout({
       <body className={inter.className} suppressHydrationWarning>
         <QueryProvider>
           <ToastProvider>
-            <div className="flex min-h-screen">
+            <div className="flex min-h-screen bg-[#0a0d1a]">
               <Sidebar />
-              <div className="flex-1 ml-[250px]">
+              <div className="flex-1 ml-[250px] min-w-0 min-h-screen flex flex-col">
                 <TopBar />
-                <main className="p-6">{children}</main>
+                <main className="flex-1 p-6 pb-20">{children}</main>
               </div>
             </div>
           </ToastProvider>

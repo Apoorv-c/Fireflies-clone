@@ -35,8 +35,19 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
   const [transcriptText, setTranscriptText] = useState('');
   const [transcriptMode, setTranscriptMode] = useState<'none' | 'upload' | 'paste'>('none');
 
+  // Format current local date-time for datetime-local input
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  const defaultDateTime = now.toISOString().slice(0, 16);
+
   const { register, handleSubmit, reset, formState: { errors } } = useForm<MeetingFormData>({
     resolver: zodResolver(meetingSchema),
+    defaultValues: {
+      title: '',
+      date: defaultDateTime,
+      duration_minutes: 45,
+      tags: '',
+    },
   });
 
   const addParticipant = () => {
@@ -70,13 +81,13 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
 
   const onSubmit = async (data: MeetingFormData) => {
     try {
-      const validParticipants = participants.filter(p => p.name.trim());
-      const tags = data.tags ? data.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
+      const validParticipants = participants.filter((p) => p.name.trim());
+      const tags = data.tags ? data.tags.split(',').map((t) => t.trim()).filter(Boolean) : [];
 
       const meeting = await createMeeting.mutateAsync({
         title: data.title,
         date: new Date(data.date).toISOString(),
-        duration_seconds: data.duration_minutes * 60,
+        duration_seconds: Number(data.duration_minutes) * 60,
         participants: validParticipants,
         tags,
       });
@@ -85,19 +96,18 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
       if (transcriptFile && meeting.id) {
         try {
           await uploadTranscript.mutateAsync({ meetingId: meeting.id, file: transcriptFile });
-          showToast('Meeting created with transcript');
+          showToast('Meeting created with transcript file');
         } catch {
-          showToast('Meeting created but transcript upload failed', 'error');
+          showToast('Meeting created, but transcript parsing encountered an issue', 'error');
         }
       } else if (transcriptText.trim() && meeting.id) {
-        // Create a .txt file from pasted text and upload
         const blob = new Blob([transcriptText], { type: 'text/plain' });
         const file = new File([blob], 'transcript.txt', { type: 'text/plain' });
         try {
           await uploadTranscript.mutateAsync({ meetingId: meeting.id, file });
-          showToast('Meeting created with transcript');
+          showToast('Meeting created with pasted transcript');
         } catch {
-          showToast('Meeting created but transcript processing failed', 'error');
+          showToast('Meeting created, but transcript parsing encountered an issue', 'error');
         }
       } else {
         showToast('Meeting created successfully');
@@ -110,73 +120,122 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
       setTranscriptMode('none');
       onClose();
     } catch {
-      showToast('Failed to create meeting', 'error');
+      showToast('Failed to create meeting. Ensure the backend is running.', 'error');
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create Meeting" maxWidth="max-w-xl">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
-        <Input label="Title" placeholder="Meeting title" error={errors.title?.message} {...register('title')} />
-        <div className="grid grid-cols-2 gap-4">
-          <Input label="Date & Time" type="datetime-local" error={errors.date?.message} {...register('date')} />
-          <Input label="Duration (minutes)" type="number" placeholder="60" error={errors.duration_minutes?.message} {...register('duration_minutes')} />
+    <Modal isOpen={isOpen} onClose={onClose} title="Add New Meeting" maxWidth="max-w-xl">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <Input
+          label="Meeting Title *"
+          placeholder="e.g. Q4 Strategy Review"
+          error={errors.title?.message}
+          {...register('title')}
+          autoFocus
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input
+            label="Date & Time *"
+            type="datetime-local"
+            error={errors.date?.message}
+            {...register('date')}
+          />
+          <Input
+            label="Duration (minutes) *"
+            type="number"
+            placeholder="45"
+            error={errors.duration_minutes?.message}
+            {...register('duration_minutes')}
+          />
         </div>
 
         {/* Participants */}
         <div>
-          <label className="text-sm font-medium text-[#8b8ba3] block mb-2">Participants</label>
+          <label className="text-xs font-semibold text-[#8b8ba3] uppercase tracking-wider block mb-1.5">
+            Participants
+          </label>
           {participants.map((p, i) => (
             <div key={i} className="flex gap-2 mb-2">
               <input
                 type="text"
-                placeholder="Name"
+                placeholder="Participant Name"
                 value={p.name}
                 onChange={(e) => updateParticipant(i, 'name', e.target.value)}
-                className="flex-1 px-3 py-2 rounded-lg bg-[#2a2a4a] border border-[#3a3a5a] text-[#e0e0e0] placeholder-[#6b6b8a] text-sm focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50"
+                suppressHydrationWarning
+                className="flex-1 px-3 py-2 rounded-lg bg-[#1e233d] border border-[#2e355c] text-white placeholder-[#6b7294] text-xs focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50"
               />
               <input
                 type="email"
-                placeholder="Email"
+                placeholder="Email (optional)"
                 value={p.email}
                 onChange={(e) => updateParticipant(i, 'email', e.target.value)}
-                className="flex-1 px-3 py-2 rounded-lg bg-[#2a2a4a] border border-[#3a3a5a] text-[#e0e0e0] placeholder-[#6b6b8a] text-sm focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50"
+                suppressHydrationWarning
+                className="flex-1 px-3 py-2 rounded-lg bg-[#1e233d] border border-[#2e355c] text-white placeholder-[#6b7294] text-xs focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50"
               />
               {participants.length > 1 && (
-                <button type="button" onClick={() => removeParticipant(i)} className="p-2 text-[#8b8ba3] hover:text-red-400 transition-colors">
-                  <Trash2 size={16} />
+                <button
+                  type="button"
+                  onClick={() => removeParticipant(i)}
+                  className="p-2 text-[#8b8ba3] hover:text-red-400 transition-colors"
+                >
+                  <Trash2 size={15} />
                 </button>
               )}
             </div>
           ))}
-          <button type="button" onClick={addParticipant} className="text-xs text-[#6C5CE7] hover:text-[#a29bfe] flex items-center gap-1 mt-1">
-            <Plus size={14} /> Add participant
+          <button
+            type="button"
+            onClick={addParticipant}
+            suppressHydrationWarning
+            className="text-xs text-[#a29bfe] hover:text-white flex items-center gap-1 mt-1 font-medium"
+          >
+            <Plus size={13} /> Add another participant
           </button>
         </div>
 
-        <Input label="Tags (comma-separated)" placeholder="design, review, sprint" {...register('tags')} />
+        <Input
+          label="Tags (comma-separated)"
+          placeholder="e.g. roadmap, engineering, Q4"
+          {...register('tags')}
+        />
 
-        {/* Transcript Upload / Paste */}
-        <div>
-          <label className="text-sm font-medium text-[#8b8ba3] block mb-2">Transcript (optional)</label>
+        {/* Transcript Upload / Paste Option */}
+        <div className="pt-2 border-t border-[#232845]">
+          <label className="text-xs font-semibold text-[#8b8ba3] uppercase tracking-wider block mb-2">
+            Transcript (Optional)
+          </label>
           <div className="flex gap-2 mb-3">
             <button
               type="button"
-              onClick={() => { setTranscriptMode('upload'); setTranscriptText(''); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                transcriptMode === 'upload' ? 'bg-[#6C5CE7]/15 text-[#6C5CE7]' : 'bg-[#2a2a4a] text-[#8b8ba3] hover:text-[#e0e0e0]'
+              onClick={() => {
+                setTranscriptMode('upload');
+                setTranscriptText('');
+              }}
+              suppressHydrationWarning
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                transcriptMode === 'upload'
+                  ? 'bg-[#6C5CE7] text-white shadow-sm'
+                  : 'bg-[#1e233d] text-[#8b8ba3] hover:text-white'
               }`}
             >
-              <Upload size={14} /> Upload file
+              <Upload size={13} /> Upload File (.vtt, .txt, .json)
             </button>
             <button
               type="button"
-              onClick={() => { setTranscriptMode('paste'); setTranscriptFile(null); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                transcriptMode === 'paste' ? 'bg-[#6C5CE7]/15 text-[#6C5CE7]' : 'bg-[#2a2a4a] text-[#8b8ba3] hover:text-[#e0e0e0]'
+              onClick={() => {
+                setTranscriptMode('paste');
+                setTranscriptFile(null);
+              }}
+              suppressHydrationWarning
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                transcriptMode === 'paste'
+                  ? 'bg-[#6C5CE7] text-white shadow-sm'
+                  : 'bg-[#1e233d] text-[#8b8ba3] hover:text-white'
               }`}
             >
-              <FileText size={14} /> Paste text
+              <FileText size={13} /> Paste Transcript
             </button>
           </div>
 
@@ -186,25 +245,30 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
                 type="file"
                 accept=".vtt,.txt,.json"
                 onChange={handleFileChange}
+                suppressHydrationWarning
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
-              <div className="border-2 border-dashed border-[#3a3a5a] rounded-lg p-4 text-center hover:border-[#6C5CE7]/50 transition-colors">
+              <div className="border-2 border-dashed border-[#2d345a] rounded-xl p-5 text-center hover:border-[#6C5CE7] transition-colors bg-[#181c33]/50">
                 {transcriptFile ? (
                   <div className="flex items-center justify-center gap-2">
                     <FileText size={16} className="text-[#6C5CE7]" />
-                    <span className="text-sm text-[#e0e0e0]">{transcriptFile.name}</span>
+                    <span className="text-xs font-medium text-white">{transcriptFile.name}</span>
                     <button
                       type="button"
-                      onClick={(e) => { e.stopPropagation(); setTranscriptFile(null); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setTranscriptFile(null);
+                      }}
                       className="text-[#8b8ba3] hover:text-red-400 ml-2"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={13} />
                     </button>
                   </div>
                 ) : (
                   <>
-                    <Upload size={20} className="text-[#6b6b8a] mx-auto mb-1" />
-                    <p className="text-xs text-[#6b6b8a]">Drop a .vtt, .txt, or .json file here</p>
+                    <Upload size={22} className="text-[#6C5CE7] mx-auto mb-1.5" />
+                    <p className="text-xs text-[#e0e0e0] font-medium">Click or drag a transcript file</p>
+                    <p className="text-[11px] text-[#6b7294] mt-0.5">Supports WebVTT (.vtt), plain text (.txt), and JSON</p>
                   </>
                 )}
               </div>
@@ -215,17 +279,21 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
             <textarea
               value={transcriptText}
               onChange={(e) => setTranscriptText(e.target.value)}
-              placeholder="Paste transcript text here...&#10;&#10;Format: one line per segment, or JSON array [{speaker, start, end, text}]"
-              rows={6}
-              className="w-full px-3 py-2 rounded-lg bg-[#2a2a4a] border border-[#3a3a5a] text-[#e0e0e0] placeholder-[#6b6b8a] text-sm focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50 resize-none"
+              placeholder="Paste dialogue here...&#10;&#10;Sarah Chen: Let's get started on the sprint.&#10;Mike Johnson: The auth bug has been resolved."
+              rows={5}
+              suppressHydrationWarning
+              className="w-full px-3 py-2 rounded-xl bg-[#1e233d] border border-[#2d345a] text-white placeholder-[#6b7294] text-xs focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50 resize-none font-mono"
             />
           )}
         </div>
 
-        <div className="flex justify-end gap-3 pt-2 sticky bottom-0 bg-[#16213e]">
-          <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
+        {/* Buttons */}
+        <div className="flex justify-end gap-2.5 pt-3 border-t border-[#232845]">
+          <Button type="button" variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
           <Button type="submit" disabled={createMeeting.isPending}>
-            {createMeeting.isPending ? 'Creating...' : 'Create Meeting'}
+            {createMeeting.isPending ? 'Creating Meeting...' : 'Create Meeting'}
           </Button>
         </div>
       </form>
