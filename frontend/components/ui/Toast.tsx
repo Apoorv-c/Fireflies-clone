@@ -55,13 +55,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`flex items-center gap-3 px-4 py-3 bg-[#1e1e3a] border ${bgColors[toast.type]} rounded-lg shadow-xl animate-slide-in min-w-[300px]`}
+            className={`flex items-center gap-3 px-4 py-3 bg-white border border-slate-200 shadow-xl rounded-xl animate-slide-in min-w-[300px]`}
           >
             {icons[toast.type]}
-            <span className="text-sm text-[#e0e0e0] flex-1">{toast.message}</span>
+            <span className="text-sm font-medium text-slate-800 flex-1">{toast.message}</span>
             <button
               onClick={() => removeToast(toast.id)}
-              className="text-[#8b8ba3] hover:text-[#e0e0e0] transition-colors"
+              className="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
             >
               <X size={14} />
             </button>

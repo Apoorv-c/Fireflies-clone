@@ -42,24 +42,24 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className={`${maxWidth} w-full my-auto bg-[#141829] rounded-2xl border border-[#2d345a] shadow-2xl overflow-hidden`}
+        className={`${maxWidth} w-full my-auto bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#232845] bg-[#111424]">
-          <h2 className="text-base font-bold text-white tracking-tight">{title}</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
+          <h2 className="text-base font-bold text-slate-900 tracking-tight">{title}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#8b8ba3] hover:text-white hover:bg-[#202540] transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
           >
             <X size={18} />
           </button>
         </div>
-        <div className="p-6 max-h-[82vh] overflow-y-auto">{children}</div>
+        <div className="p-6 max-h-[82vh] overflow-y-auto text-slate-800">{children}</div>
       </div>
     </div>,
     document.body

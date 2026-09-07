@@ -72,25 +72,25 @@ export default function AskFredPanel({ meetingId }: AskFredPanelProps) {
   ];
 
   return (
-    <div className="flex flex-col h-full bg-[#141829] rounded-xl border border-[#252a4a] overflow-hidden" suppressHydrationWarning>
+    <div className="flex flex-col h-full bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden" suppressHydrationWarning>
       {/* Header */}
-      <div className="flex items-center gap-2.5 px-4 py-3 border-b border-[#252a4a] bg-[#121526]">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#6C5CE7] to-[#a29bfe] flex items-center justify-center text-white shadow-md">
+      <div className="flex items-center gap-2.5 px-4 py-3 border-b border-slate-100 bg-slate-50/70">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#7c3aed] to-[#a855f7] flex items-center justify-center text-white shadow-xs">
           <Bot size={18} />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-white flex items-center gap-1.5">
+          <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
             AskFred AI
-            <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-[#6C5CE7]/20 text-[#a29bfe]">
+            <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-purple-100 text-[#7c3aed]">
               AI Copilot
             </span>
           </h3>
-          <p className="text-xs text-[#8b8ba3]">Ask any question about this meeting transcript</p>
+          <p className="text-xs text-slate-500">Ask any question about this meeting transcript</p>
         </div>
       </div>
 
       {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3.5">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-white">
         {messages.map((m) => (
           <div
             key={m.id}
@@ -99,18 +99,18 @@ export default function AskFredPanel({ meetingId }: AskFredPanelProps) {
             <div
               className={`w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${
                 m.sender === 'user'
-                  ? 'bg-[#2a2f52] text-white'
-                  : 'bg-[#6C5CE7] text-white'
+                  ? 'bg-slate-700 text-white'
+                  : 'bg-[#7c3aed] text-white'
               }`}
             >
-              {m.sender === 'user' ? <User size={14} /> : <Sparkles size={14} />}
+              {m.sender === 'user' ? <User size={13} /> : <Sparkles size={13} />}
             </div>
 
             <div
               className={`max-w-[82%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed ${
                 m.sender === 'user'
-                  ? 'bg-[#6C5CE7] text-white rounded-tr-none shadow-md'
-                  : 'bg-[#1b2038] text-[#e0e0e0] border border-[#2c3258] rounded-tl-none whitespace-pre-line'
+                  ? 'bg-[#7c3aed] text-white rounded-tr-none shadow-xs'
+                  : 'bg-slate-50 text-slate-800 border border-slate-200 rounded-tl-none whitespace-pre-line shadow-2xs'
               }`}
             >
               {m.text}
@@ -120,11 +120,11 @@ export default function AskFredPanel({ meetingId }: AskFredPanelProps) {
 
         {isThinking && (
           <div className="flex items-start gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-[#6C5CE7] text-white flex items-center justify-center flex-shrink-0">
-              <Sparkles size={14} />
+            <div className="w-7 h-7 rounded-full bg-[#7c3aed] text-white flex items-center justify-center flex-shrink-0">
+              <Sparkles size={13} />
             </div>
-            <div className="bg-[#1b2038] border border-[#2c3258] px-3.5 py-2.5 rounded-2xl rounded-tl-none text-xs text-[#8b8ba3] flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#6C5CE7] animate-ping" />
+            <div className="bg-slate-50 border border-slate-200 px-3.5 py-2.5 rounded-2xl rounded-tl-none text-xs text-slate-500 flex items-center gap-2 shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-[#7c3aed] animate-ping" />
               <span>Fred is reviewing the transcript...</span>
             </div>
           </div>
@@ -132,7 +132,7 @@ export default function AskFredPanel({ meetingId }: AskFredPanelProps) {
       </div>
 
       {/* Suggested Quick Prompts */}
-      <div className="px-4 py-2 border-t border-[#252a4a] bg-[#121526]/50 flex items-center gap-1.5 overflow-x-auto">
+      <div className="px-4 py-2 border-t border-slate-100 bg-slate-50/50 flex items-center gap-1.5 overflow-x-auto">
         {samplePrompts.map((p, i) => (
           <button
             key={i}
@@ -140,7 +140,7 @@ export default function AskFredPanel({ meetingId }: AskFredPanelProps) {
               setInput(p);
             }}
             suppressHydrationWarning
-            className="text-[11px] whitespace-nowrap px-2.5 py-1 rounded-full bg-[#1f243d] hover:bg-[#2c3358] text-[#a29bfe] border border-[#333a65] transition-colors"
+            className="text-[11px] whitespace-nowrap px-2.5 py-1 rounded-full bg-white hover:bg-purple-50 text-slate-600 hover:text-[#7c3aed] border border-slate-200 hover:border-purple-200 transition-colors shadow-2xs cursor-pointer"
           >
             {p}
           </button>
@@ -148,7 +148,7 @@ export default function AskFredPanel({ meetingId }: AskFredPanelProps) {
       </div>
 
       {/* Input Box */}
-      <form onSubmit={handleSend} className="p-3 bg-[#121526] border-t border-[#252a4a]">
+      <form onSubmit={handleSend} className="p-3 bg-slate-50/70 border-t border-slate-100">
         <div className="relative flex items-center">
           <input
             type="text"
@@ -156,13 +156,13 @@ export default function AskFredPanel({ meetingId }: AskFredPanelProps) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             suppressHydrationWarning
-            className="w-full pl-3.5 pr-10 py-2.5 bg-[#1b2038] border border-[#2c3258] rounded-xl text-xs text-[#e0e0e0] placeholder-[#6b7294] focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50 focus:border-[#6C5CE7] transition-all"
+            className="w-full pl-3.5 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/30 focus:border-[#7c3aed] transition-all shadow-xs"
           />
           <button
             type="submit"
             disabled={!input.trim() || isThinking}
             suppressHydrationWarning
-            className="absolute right-1.5 w-7 h-7 rounded-lg bg-[#6C5CE7] hover:bg-[#5a4bd6] disabled:opacity-40 text-white flex items-center justify-center transition-all"
+            className="absolute right-1.5 w-7 h-7 rounded-lg bg-[#7c3aed] hover:bg-[#6d28d9] disabled:opacity-40 text-white flex items-center justify-center transition-all cursor-pointer shadow-xs"
           >
             <Send size={13} />
           </button>

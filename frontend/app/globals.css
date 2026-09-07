@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --sidebar-bg: #0f1222;
-  --content-bg: #0a0d1a;
-  --card-bg: #141829;
-  --card-hover: #181d33;
+  --sidebar-bg: #ffffff;
+  --content-bg: #ffffff;
+  --card-bg: #ffffff;
+  --card-hover: #f8fafc;
   --accent: #6C5CE7;
-  --accent-light: #a29bfe;
-  --text-primary: #f1f3fa;
-  --text-secondary: #9499b7;
-  --border: #202540;
+  --accent-light: #8075ea;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
 }
 
-/* Reset buttons and form controls so browser defaults never show white backgrounds */
+/* Reset buttons and form controls */
 button {
   background-color: transparent;
   color: inherit;
@@ -27,31 +27,31 @@ input, select, textarea {
 html {
   overflow-y: auto;
   scroll-behavior: smooth;
-  background-color: #0a0d1a;
+  background-color: #ffffff;
 }
 
 body {
   min-height: 100vh;
   overflow-x: hidden;
-  background-color: #0a0d1a;
-  color: #f1f3fa;
+  background-color: #ffffff;
+  color: #0f172a;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0a0d1a;
+  background: #f8fafc;
 }
 ::-webkit-scrollbar-thumb {
-  background: #252b4a;
+  background: #cbd5e1;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
+  background: #94a3b8;
 }
 
 /* Toast animation */

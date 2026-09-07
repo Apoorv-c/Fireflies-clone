@@ -153,7 +153,7 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
 
         {/* Participants */}
         <div>
-          <label className="text-xs font-semibold text-[#8b8ba3] uppercase tracking-wider block mb-1.5">
+          <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider block mb-1.5">
             Participants
           </label>
           {participants.map((p, i) => (
@@ -164,7 +164,7 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
                 value={p.name}
                 onChange={(e) => updateParticipant(i, 'name', e.target.value)}
                 suppressHydrationWarning
-                className="flex-1 px-3 py-2 rounded-lg bg-[#1e233d] border border-[#2e355c] text-white placeholder-[#6b7294] text-xs focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50"
+                className="flex-1 px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-900 placeholder-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/30 focus:border-[#7c3aed] shadow-xs"
               />
               <input
                 type="email"
@@ -172,13 +172,13 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
                 value={p.email}
                 onChange={(e) => updateParticipant(i, 'email', e.target.value)}
                 suppressHydrationWarning
-                className="flex-1 px-3 py-2 rounded-lg bg-[#1e233d] border border-[#2e355c] text-white placeholder-[#6b7294] text-xs focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50"
+                className="flex-1 px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-900 placeholder-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/30 focus:border-[#7c3aed] shadow-xs"
               />
               {participants.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeParticipant(i)}
-                  className="p-2 text-[#8b8ba3] hover:text-red-400 transition-colors"
+                  className="p-2 text-slate-400 hover:text-red-500 transition-colors"
                 >
                   <Trash2 size={15} />
                 </button>
@@ -189,7 +189,7 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
             type="button"
             onClick={addParticipant}
             suppressHydrationWarning
-            className="text-xs text-[#a29bfe] hover:text-white flex items-center gap-1 mt-1 font-medium"
+            className="text-xs text-[#7c3aed] hover:text-[#6d28d9] flex items-center gap-1 mt-1 font-medium cursor-pointer"
           >
             <Plus size={13} /> Add another participant
           </button>
@@ -202,8 +202,8 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
         />
 
         {/* Transcript Upload / Paste Option */}
-        <div className="pt-2 border-t border-[#232845]">
-          <label className="text-xs font-semibold text-[#8b8ba3] uppercase tracking-wider block mb-2">
+        <div className="pt-2 border-t border-slate-100">
+          <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider block mb-2">
             Transcript (Optional)
           </label>
           <div className="flex gap-2 mb-3">
@@ -214,10 +214,10 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
                 setTranscriptText('');
               }}
               suppressHydrationWarning
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 transcriptMode === 'upload'
-                  ? 'bg-[#6C5CE7] text-white shadow-sm'
-                  : 'bg-[#1e233d] text-[#8b8ba3] hover:text-white'
+                  ? 'bg-[#7c3aed] text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
               }`}
             >
               <Upload size={13} /> Upload File (.vtt, .txt, .json)
@@ -229,10 +229,10 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
                 setTranscriptFile(null);
               }}
               suppressHydrationWarning
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 transcriptMode === 'paste'
-                  ? 'bg-[#6C5CE7] text-white shadow-sm'
-                  : 'bg-[#1e233d] text-[#8b8ba3] hover:text-white'
+                  ? 'bg-[#7c3aed] text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
               }`}
             >
               <FileText size={13} /> Paste Transcript
@@ -248,27 +248,27 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
                 suppressHydrationWarning
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
-              <div className="border-2 border-dashed border-[#2d345a] rounded-xl p-5 text-center hover:border-[#6C5CE7] transition-colors bg-[#181c33]/50">
+              <div className="border-2 border-dashed border-slate-200 rounded-xl p-5 text-center hover:border-[#7c3aed] transition-colors bg-slate-50/70">
                 {transcriptFile ? (
                   <div className="flex items-center justify-center gap-2">
-                    <FileText size={16} className="text-[#6C5CE7]" />
-                    <span className="text-xs font-medium text-white">{transcriptFile.name}</span>
+                    <FileText size={16} className="text-[#7c3aed]" />
+                    <span className="text-xs font-medium text-slate-900">{transcriptFile.name}</span>
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setTranscriptFile(null);
                       }}
-                      className="text-[#8b8ba3] hover:text-red-400 ml-2"
+                      className="text-slate-400 hover:text-red-500 ml-2"
                     >
                       <Trash2 size={13} />
                     </button>
                   </div>
                 ) : (
                   <>
-                    <Upload size={22} className="text-[#6C5CE7] mx-auto mb-1.5" />
-                    <p className="text-xs text-[#e0e0e0] font-medium">Click or drag a transcript file</p>
-                    <p className="text-[11px] text-[#6b7294] mt-0.5">Supports WebVTT (.vtt), plain text (.txt), and JSON</p>
+                    <Upload size={22} className="text-[#7c3aed] mx-auto mb-1.5" />
+                    <p className="text-xs text-slate-800 font-medium">Click or drag a transcript file</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Supports WebVTT (.vtt), plain text (.txt), and JSON</p>
                   </>
                 )}
               </div>
@@ -282,13 +282,13 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
               placeholder="Paste dialogue here...&#10;&#10;Sarah Chen: Let's get started on the sprint.&#10;Mike Johnson: The auth bug has been resolved."
               rows={5}
               suppressHydrationWarning
-              className="w-full px-3 py-2 rounded-xl bg-[#1e233d] border border-[#2d345a] text-white placeholder-[#6b7294] text-xs focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50 resize-none font-mono"
+              className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 placeholder-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/30 focus:border-[#7c3aed] resize-none font-mono shadow-xs"
             />
           )}
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-end gap-2.5 pt-3 border-t border-[#232845]">
+        <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancel
           </Button>

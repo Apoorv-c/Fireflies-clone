@@ -347,17 +347,17 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
   const progress = Math.min(100, (currentTime / effectiveDuration) * 100);
 
   return (
-    <div className="bg-[#121526] border border-[#232845] rounded-xl p-4 mb-6 shadow-xl" suppressHydrationWarning>
+    <div className="bg-white border border-slate-200/80 rounded-2xl p-4 mb-5 shadow-xs" suppressHydrationWarning>
       {audioUrl && <audio ref={audioRef} src={audioUrl} preload="metadata" />}
 
       {/* Scrubber and Waveform */}
       <div className="mb-3">
-        <div className="flex items-center justify-between text-xs font-mono text-[#8b8ba3] mb-1.5">
-          <span className="text-[#a29bfe] font-semibold">{formatTime(currentTime)}</span>
-          <div className="flex items-center gap-2 text-[11px] text-[#6b6b8a]">
+        <div className="flex items-center justify-between text-xs font-mono text-slate-500 mb-1.5">
+          <span className="text-[#6C5CE7] font-semibold">{formatTime(currentTime)}</span>
+          <div className="flex items-center gap-2 text-[11px] text-slate-400">
             {isPlaying && (
-              <span className="flex items-center gap-1.5 text-emerald-400 font-sans font-medium">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="flex items-center gap-1.5 text-emerald-600 font-sans font-medium">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 {currentSpeaker ? `Speaking: ${currentSpeaker}` : 'Playing'}
               </span>
             )}
@@ -367,9 +367,9 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
         </div>
 
         {/* Custom Scrubber Bar */}
-        <div className="relative h-2.5 bg-[#1e233d] rounded-full overflow-hidden cursor-pointer group">
+        <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden cursor-pointer group">
           <div
-            className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-[#6C5CE7] to-[#a29bfe] rounded-full transition-all duration-100"
+            className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-[#6C5CE7] to-[#8075ea] rounded-full transition-all duration-100"
             style={{ width: `${progress}%` }}
           />
           <input
@@ -394,7 +394,7 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
             title="Rewind 5s"
             type="button"
             suppressHydrationWarning
-            className="p-2 rounded-lg text-[#8b8ba3] hover:text-white hover:bg-[#1f243d] transition-colors"
+            className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <RotateCcw size={17} />
           </button>
@@ -403,10 +403,10 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
             onClick={togglePlay}
             type="button"
             suppressHydrationWarning
-            className="w-11 h-11 rounded-full bg-[#6C5CE7] hover:bg-[#5a4bd6] flex items-center justify-center text-white shadow-lg shadow-[#6C5CE7]/30 transition-all hover:scale-105 active:scale-95"
+            className="w-10 h-10 rounded-full bg-[#6C5CE7] hover:bg-[#5a4bd6] flex items-center justify-center text-white shadow-xs hover:shadow transition-all hover:scale-105 active:scale-95 cursor-pointer"
             title={isPlaying ? 'Pause Narration' : 'Play Transcript to Voice'}
           >
-            {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}
+            {isPlaying ? <Pause size={18} /> : <Play size={18} className="ml-0.5" />}
           </button>
 
           <button
@@ -414,7 +414,7 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
             title="Forward 5s"
             type="button"
             suppressHydrationWarning
-            className="p-2 rounded-lg text-[#8b8ba3] hover:text-white hover:bg-[#1f243d] transition-colors"
+            className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <RotateCw size={17} />
           </button>
@@ -427,13 +427,13 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
             type="button"
             title="Toggle AI Voiceover Narration"
             suppressHydrationWarning
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer ${
               voiceVoiceover
-                ? 'bg-[#6C5CE7]/15 border-[#6C5CE7]/40 text-[#a29bfe]'
-                : 'bg-[#181c33] border-[#293054] text-[#6b7499]'
+                ? 'bg-[#6C5CE7]/10 border-[#6C5CE7]/30 text-[#6C5CE7]'
+                : 'bg-slate-100 border-slate-200 text-slate-500'
             }`}
           >
-            <Sparkles size={13} className={voiceVoiceover ? 'text-[#6C5CE7]' : 'text-[#6b7499]'} />
+            <Sparkles size={13} className={voiceVoiceover ? 'text-[#6C5CE7]' : 'text-slate-400'} />
             <span>AI Voice: {voiceVoiceover ? 'Active (Multi-Speaker)' : 'Off (Muted)'}</span>
           </button>
         </div>
@@ -445,7 +445,7 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
             onClick={cyclePlaybackRate}
             type="button"
             suppressHydrationWarning
-            className="px-2.5 py-1 rounded-md text-xs font-semibold bg-[#1e233d] hover:bg-[#282f52] text-[#e0e0e0] transition-colors border border-[#313860]"
+            className="px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 hover:bg-slate-200/80 text-slate-700 transition-colors border border-slate-200 cursor-pointer"
             title="Toggle playback speed"
           >
             {playbackRate}x
@@ -457,11 +457,11 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
               onClick={toggleMute}
               type="button"
               suppressHydrationWarning
-              className="p-1.5 rounded-lg text-[#8b8ba3] hover:text-white hover:bg-[#1f243d] transition-colors"
+              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
               title={isMuted ? 'Unmute' : 'Mute'}
             >
               {isMuted ? (
-                <VolumeX size={17} className="text-red-400" />
+                <VolumeX size={17} className="text-rose-500" />
               ) : volume > 0.5 ? (
                 <Volume2 size={17} />
               ) : (
@@ -481,7 +481,7 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
                 if (isMuted && newVol > 0) setIsMuted(false);
               }}
               suppressHydrationWarning
-              className="w-16 h-1 bg-[#252b4a] rounded-lg appearance-none cursor-pointer accent-[#6C5CE7]"
+              className="w-16 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#6C5CE7]"
               title={`Volume: ${Math.round((isMuted ? 0 : volume) * 100)}%`}
             />
           </div>

@@ -48,13 +48,13 @@ export default function SegmentRow({ segment, isActive, searchQuery, onPlayFrom 
       onClick={() => onPlayFrom(segment.start_time)}
       className={`group relative flex items-start gap-3.5 px-4 py-3 cursor-pointer rounded-xl transition-all duration-150 mx-1 mb-1.5 ${
         isActive
-          ? 'bg-[#1e233f] border-l-4 border-[#6C5CE7] shadow-md shadow-[#6C5CE7]/10'
-          : 'hover:bg-[#161a2e] border-l-4 border-transparent'
+          ? 'bg-[#6C5CE7]/10 border-l-4 border-[#6C5CE7] shadow-2xs'
+          : 'hover:bg-slate-50 border-l-4 border-transparent'
       }`}
     >
       {/* Speaker Avatar Circle */}
       <div
-        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-sm transition-transform group-hover:scale-105"
+        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-2xs transition-transform group-hover:scale-105"
         style={{ backgroundColor: segment.speaker_color || '#6C5CE7' }}
         title={segment.speaker_label || 'Speaker'}
       >
@@ -67,7 +67,7 @@ export default function SegmentRow({ segment, isActive, searchQuery, onPlayFrom 
           <div className="flex items-center gap-2">
             <span
               className="text-xs font-semibold tracking-tight"
-              style={{ color: segment.speaker_color || '#e0e0e0' }}
+              style={{ color: segment.speaker_color || '#0f172a' }}
             >
               {segment.speaker_label || 'Speaker'}
             </span>
@@ -79,7 +79,7 @@ export default function SegmentRow({ segment, isActive, searchQuery, onPlayFrom 
                 onPlayFrom(segment.start_time);
               }}
               suppressHydrationWarning
-              className="flex items-center gap-1 text-[11px] font-mono px-1.5 py-0.5 rounded bg-[#202540] text-[#a29bfe] hover:bg-[#6C5CE7] hover:text-white transition-colors"
+              className="flex items-center gap-1 text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 hover:bg-[#6C5CE7] hover:text-white transition-colors cursor-pointer"
             >
               <Play size={10} className="fill-current" />
               <span>{formatTimestamp(segment.start_time)}</span>
@@ -92,16 +92,16 @@ export default function SegmentRow({ segment, isActive, searchQuery, onPlayFrom 
               onClick={handleCopy}
               title="Copy line"
               suppressHydrationWarning
-              className="p-1 rounded text-[#8b8ba3] hover:text-white hover:bg-[#252b47] transition-colors"
+              className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors"
             >
-              {copied ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+              {copied ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
             </button>
           </div>
         </div>
 
         {/* Text */}
         <p
-          className="text-xs sm:text-sm text-[#d4d7e6] leading-relaxed select-text"
+          className="text-xs sm:text-sm text-slate-700 leading-relaxed select-text font-normal"
           dangerouslySetInnerHTML={{ __html: highlightedContent }}
         />
       </div>

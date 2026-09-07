@@ -65,14 +65,14 @@ export default function SummaryPanel({ meetingId }: SummaryPanelProps) {
   const chapters = summary.chapters || [];
 
   return (
-    <div className="space-y-6" suppressHydrationWarning>
+    <div className="space-y-6 p-4 overflow-y-auto max-h-[610px]" suppressHydrationWarning>
       {/* Executive Summary Card */}
-      <div className="bg-[#161a2e] border border-[#252b47] rounded-xl p-4 shadow-sm">
-        <div className="flex items-center gap-2 text-[#a29bfe] font-semibold text-xs uppercase tracking-wider mb-2.5">
-          <Sparkles size={14} className="text-[#6C5CE7]" />
+      <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 shadow-2xs">
+        <div className="flex items-center gap-2 text-[#6C5CE7] font-semibold text-xs uppercase tracking-wider mb-2">
+          <Sparkles size={14} />
           <span>Executive Overview</span>
         </div>
-        <p className="text-sm text-[#f1f3fa] leading-relaxed font-normal">
+        <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
           {summary.overview}
         </p>
       </div>
@@ -81,10 +81,10 @@ export default function SummaryPanel({ meetingId }: SummaryPanelProps) {
       {topics.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h4 className="text-xs font-bold text-[#8b8ba3] uppercase tracking-wider">
+            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               Key Topics ({topics.length})
             </h4>
-            <span className="text-[11px] text-[#6b7294]">Click to expand</span>
+            <span className="text-[11px] text-slate-400">Click to expand</span>
           </div>
 
           <div className="space-y-2">
@@ -93,24 +93,24 @@ export default function SummaryPanel({ meetingId }: SummaryPanelProps) {
               return (
                 <div
                   key={i}
-                  className="bg-[#161a2e] border border-[#252b47] hover:border-[#353e66] rounded-xl overflow-hidden transition-all duration-150"
+                  className="bg-slate-50/60 border border-slate-200/80 hover:border-slate-300 rounded-xl overflow-hidden transition-all duration-150"
                 >
                   <button
                     onClick={() => toggleTopic(i)}
                     type="button"
                     suppressHydrationWarning
-                    className="w-full flex items-center justify-between px-4 py-3 text-left transition-colors bg-transparent"
+                    className="w-full flex items-center justify-between px-4 py-3 text-left transition-colors cursor-pointer"
                   >
                     <div className="flex items-center gap-2.5 flex-1 pr-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#6C5CE7]" />
-                      <span className="text-xs sm:text-sm font-semibold text-white">
+                      <span className="text-xs font-semibold text-slate-800">
                         {topic.title}
                       </span>
                     </div>
 
-                    <div className="p-1 rounded text-[#8b8ba3]">
+                    <div className="p-1 rounded text-slate-400">
                       {isExpanded ? (
-                        <ChevronDown size={15} className="text-[#a29bfe]" />
+                        <ChevronDown size={15} className="text-[#6C5CE7]" />
                       ) : (
                         <ChevronRight size={15} />
                       )}
@@ -118,8 +118,8 @@ export default function SummaryPanel({ meetingId }: SummaryPanelProps) {
                   </button>
 
                   {isExpanded && (
-                    <div className="px-4 pb-3.5 pt-1 border-t border-[#1e233d] bg-[#121526]/60">
-                      <p className="text-xs text-[#c5c9de] leading-relaxed">
+                    <div className="px-4 pb-3.5 pt-1 border-t border-slate-200/70 bg-slate-100/40">
+                      <p className="text-xs text-slate-600 leading-relaxed">
                         {topic.description}
                       </p>
                     </div>
@@ -134,7 +134,7 @@ export default function SummaryPanel({ meetingId }: SummaryPanelProps) {
       {/* Chapters / Timeline Section */}
       {chapters.length > 0 && (
         <div>
-          <h4 className="text-xs font-bold text-[#8b8ba3] uppercase tracking-wider mb-3">
+          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
             Chapters &amp; Timeline ({chapters.length})
           </h4>
 
@@ -145,18 +145,18 @@ export default function SummaryPanel({ meetingId }: SummaryPanelProps) {
                 onClick={() => handleSeek(chapter.start_time)}
                 type="button"
                 suppressHydrationWarning
-                className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#161a2e] hover:bg-[#1e233d] border border-[#252b47] hover:border-[#3b436e] transition-all group text-left"
+                className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50/60 hover:bg-slate-100/80 border border-slate-200/80 hover:border-slate-300 transition-all group text-left cursor-pointer"
               >
                 <div className="flex items-center gap-2.5 flex-1 pr-2">
-                  <div className="w-6 h-6 rounded-lg bg-[#6C5CE7]/15 flex items-center justify-center text-[#a29bfe] group-hover:bg-[#6C5CE7] group-hover:text-white transition-colors">
+                  <div className="w-6 h-6 rounded-lg bg-[#6C5CE7]/10 flex items-center justify-center text-[#6C5CE7] group-hover:bg-[#6C5CE7] group-hover:text-white transition-colors">
                     <Clock size={12} />
                   </div>
-                  <span className="text-xs font-medium text-white group-hover:text-[#a29bfe] transition-colors">
+                  <span className="text-xs font-medium text-slate-800 group-hover:text-[#6C5CE7] transition-colors">
                     {chapter.title}
                   </span>
                 </div>
 
-                <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[#1e233d] group-hover:bg-[#6C5CE7] text-[#a29bfe] group-hover:text-white transition-all font-semibold">
+                <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-slate-100 group-hover:bg-[#6C5CE7] text-slate-600 group-hover:text-white transition-all font-semibold">
                   {formatTimestamp(chapter.start_time)}
                 </span>
               </button>

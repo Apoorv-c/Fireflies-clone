@@ -41,80 +41,82 @@ export default function MeetingsPage() {
   }, [meetings]);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6" suppressHydrationWarning>
+    <div className="max-w-7xl mx-auto space-y-6 py-2" suppressHydrationWarning>
       {/* Top Banner with Stats (Fireflies Notebook Dashboard) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-2xl font-bold text-white tracking-tight">Meeting Notebook</h1>
-            <span className="px-2 py-0.5 rounded-full bg-[#6C5CE7]/20 text-[#a29bfe] text-xs font-semibold">
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Meeting Notebook</h1>
+            <span className="px-2 py-0.5 rounded-full bg-[#6C5CE7]/10 text-[#6C5CE7] text-[11px] font-semibold">
               Live Workspace
             </span>
           </div>
-          <p className="text-xs text-[#8b8ba3]">
+          <p className="text-xs text-slate-500">
             Browse all transcripts, audio recordings, and AI-generated notes
           </p>
         </div>
 
-        <Button onClick={() => setIsCreateOpen(true)} className="shadow-lg shadow-[#6C5CE7]/25">
-          <Plus size={16} />
+        <Button onClick={() => setIsCreateOpen(true)} className="shadow-xs bg-[#6C5CE7] hover:bg-[#5a4bd6] text-white">
+          <Plus size={15} />
           <span>New Meeting</span>
         </Button>
       </div>
 
       {/* Stats Counter Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-        <div className="bg-[#121526] border border-[#232845] rounded-xl p-3.5 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-[#6C5CE7]/15 flex items-center justify-center text-[#6C5CE7]">
+        <div className="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-lg bg-[#6C5CE7]/10 flex items-center justify-center text-[#6C5CE7]">
             <Mic size={18} />
           </div>
           <div>
-            <p className="text-[11px] font-medium text-[#8b8ba3] uppercase tracking-wider">Total Meetings</p>
-            <p className="text-lg font-bold text-white">{isLoading ? '...' : stats.total}</p>
+            <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Total Meetings</p>
+            <p className="text-lg font-bold text-slate-900">{isLoading ? '...' : stats.total}</p>
           </div>
         </div>
 
-        <div className="bg-[#121526] border border-[#232845] rounded-xl p-3.5 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-400">
+        <div className="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
             <Clock size={18} />
           </div>
           <div>
-            <p className="text-[11px] font-medium text-[#8b8ba3] uppercase tracking-wider">Recorded Time</p>
-            <p className="text-lg font-bold text-white">{isLoading ? '...' : `${stats.totalHours} hrs`}</p>
+            <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Recorded Time</p>
+            <p className="text-lg font-bold text-slate-900">{isLoading ? '...' : `${stats.totalHours} hrs`}</p>
           </div>
         </div>
 
-        <div className="bg-[#121526] border border-[#232845] rounded-xl p-3.5 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-400">
+        <div className="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
             <Sparkles size={18} />
           </div>
           <div>
-            <p className="text-[11px] font-medium text-[#8b8ba3] uppercase tracking-wider">AI Summaries</p>
-            <p className="text-lg font-bold text-white">{isLoading ? '...' : `${stats.total} Ready`}</p>
+            <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">AI Summaries</p>
+            <p className="text-lg font-bold text-slate-900">{isLoading ? '...' : `${stats.total} Ready`}</p>
           </div>
         </div>
       </div>
 
       {/* Filter Tabs: All Meetings vs My Meetings */}
-      <div className="flex items-center gap-2 border-b border-[#232845] pb-2">
+      <div className="flex items-center gap-1.5 p-1 bg-slate-100/70 rounded-lg w-fit">
         <button
           onClick={() => setActiveTab('all')}
+          type="button"
           suppressHydrationWarning
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+          className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
             activeTab === 'all'
-              ? 'bg-[#1e233d] text-white border border-[#313860]'
-              : 'text-[#8b8ba3] hover:text-white'
+              ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           All Meetings ({stats.total})
         </button>
         <button
           onClick={() => setActiveTab('mine')}
+          type="button"
           suppressHydrationWarning
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+          className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
             activeTab === 'mine'
-              ? 'bg-[#1e233d] text-white border border-[#313860]'
-              : 'text-[#8b8ba3] hover:text-white'
+              ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           My Meetings

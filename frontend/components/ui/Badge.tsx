@@ -11,7 +11,7 @@ export default function Badge({ children, color, variant = 'filled', className =
   if (variant === 'outline') {
     return (
       <span
-        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-[#3a3a5a] text-[#8b8ba3] ${className}`}
+        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-slate-200 text-slate-600 bg-slate-50 ${className}`}
       >
         {children}
       </span>

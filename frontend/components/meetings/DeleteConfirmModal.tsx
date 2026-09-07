@@ -36,11 +36,11 @@ export default function DeleteConfirmModal({ isOpen, onClose, meetingId, meeting
         <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
           <AlertTriangle size={24} className="text-red-400" />
         </div>
-        <p className="text-[#e0e0e0] mb-2">
+        <p className="text-slate-600 mb-1">
           Are you sure you want to delete
         </p>
-        <p className="text-white font-semibold mb-4">&quot;{meetingTitle}&quot;?</p>
-        <p className="text-sm text-[#8b8ba3]">
+        <p className="text-slate-900 font-bold text-base mb-3">&quot;{meetingTitle}&quot;?</p>
+        <p className="text-xs text-slate-500">
           This will permanently delete the meeting and all related data including transcripts, summaries, and action items.
         </p>
       </div>

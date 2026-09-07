@@ -8,7 +8,7 @@ interface SkeletonProps {
 }
 
 export default function Skeleton({ className = '', variant = 'custom', width, height }: SkeletonProps) {
-  const baseClass = 'animate-pulse bg-[#2a2a4a] rounded';
+  const baseClass = 'animate-pulse bg-slate-200 rounded';
 
   const variantClasses: Record<string, string> = {
     text: `${baseClass} h-4 w-full rounded`,
@@ -27,7 +27,7 @@ export default function Skeleton({ className = '', variant = 'custom', width, he
 
 export function MeetingCardSkeleton() {
   return (
-    <div className="bg-[#16213e] rounded-lg p-5 border border-[#2a2a4a] border-l-4 border-l-[#3a3a5a]">
+    <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs">
       <div className="flex items-start justify-between mb-3">
         <Skeleton className="h-5 w-48" />
         <Skeleton className="h-5 w-16 rounded-full" />

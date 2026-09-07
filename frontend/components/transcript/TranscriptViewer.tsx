@@ -71,32 +71,32 @@ export default function TranscriptViewer({ meetingId }: TranscriptViewerProps) {
 
   if (isLoading) {
     return (
-      <div className="bg-[#121526] rounded-xl border border-[#232845] p-5">
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
         <TranscriptSkeleton />
       </div>
     );
   }
 
   return (
-    <div className="bg-[#121526] rounded-xl border border-[#232845] flex flex-col h-[680px] shadow-lg overflow-hidden" suppressHydrationWarning>
+    <div className="bg-white rounded-2xl border border-slate-200/80 flex flex-col h-[680px] shadow-xs overflow-hidden" suppressHydrationWarning>
       {/* Header with Search and Speaker Filter */}
-      <div className="p-3.5 border-b border-[#232845] bg-[#15192d] flex flex-wrap items-center gap-3">
+      <div className="p-3.5 border-b border-slate-200/80 bg-slate-50/70 flex flex-wrap items-center gap-3">
         {/* Search */}
         <div className="relative flex-1 min-w-[200px]">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6b7294]" />
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             placeholder="Search in transcript..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             suppressHydrationWarning
-            className="w-full pl-9 pr-8 py-1.5 bg-[#1e233d] border border-[#2e355c] rounded-lg text-xs text-[#e0e0e0] placeholder-[#6b7294] focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50 transition-all"
+            className="w-full pl-9 pr-8 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/30 transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
               suppressHydrationWarning
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8b8ba3] hover:text-white"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
             >
               <X size={13} />
             </button>
@@ -105,12 +105,12 @@ export default function TranscriptViewer({ meetingId }: TranscriptViewerProps) {
 
         {/* Speaker Filter */}
         <div className="flex items-center gap-1.5">
-          <Users size={14} className="text-[#8b8ba3]" />
+          <Users size={14} className="text-slate-400" />
           <select
             value={selectedSpeaker}
             onChange={(e) => setSelectedSpeaker(e.target.value)}
             suppressHydrationWarning
-            className="px-2.5 py-1.5 bg-[#1e233d] border border-[#2e355c] rounded-lg text-xs text-[#e0e0e0] focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50 cursor-pointer"
+            className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/30 cursor-pointer"
           >
             <option value="all">All Speakers ({speakers.length})</option>
             {speakers.map((spk) => (
@@ -122,7 +122,7 @@ export default function TranscriptViewer({ meetingId }: TranscriptViewerProps) {
         </div>
 
         {searchQuery.trim() && (
-          <span className="text-[11px] text-[#a29bfe] font-medium">
+          <span className="text-[11px] text-[#6C5CE7] font-semibold">
             {matchCount} match{matchCount !== 1 ? 'es' : ''}
           </span>
         )}

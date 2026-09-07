@@ -140,17 +140,17 @@ export default function MeetingDetailPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-5" suppressHydrationWarning>
       {/* Top Breadcrumbs & Actions Header */}
-      <div className="bg-[#121526] border border-[#232845] rounded-xl p-5 shadow-sm">
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs">
         {/* Navigation back */}
         <div className="flex items-center justify-between mb-3">
           <Link
             href="/meetings"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#8b8ba3] hover:text-[#6C5CE7] transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#6C5CE7] transition-colors"
           >
             <ArrowLeft size={14} />
             <span>Notebook</span>
-            <span className="text-[#454d75]">/</span>
-            <span className="text-[#a29bfe] line-clamp-1">{meeting.title}</span>
+            <span className="text-slate-300">/</span>
+            <span className="text-[#6C5CE7] line-clamp-1">{meeting.title}</span>
           </Link>
 
           {/* Quick Toolbar */}
@@ -159,7 +159,7 @@ export default function MeetingDetailPage() {
               onClick={handleShare}
               title="Share meeting"
               suppressHydrationWarning
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#8b8ba3] hover:text-white bg-[#1a1e36] hover:bg-[#252b4d] border border-[#2b3259] transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-all cursor-pointer"
             >
               <Share2 size={13} />
               <span className="hidden sm:inline">Share</span>
@@ -170,7 +170,7 @@ export default function MeetingDetailPage() {
               disabled={isExporting}
               title="Export Markdown notes"
               suppressHydrationWarning
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#8b8ba3] hover:text-white bg-[#1a1e36] hover:bg-[#252b4d] border border-[#2b3259] transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-all cursor-pointer"
             >
               <Download size={13} />
               <span className="hidden sm:inline">{isExporting ? 'Exporting...' : 'Export'}</span>
@@ -180,7 +180,7 @@ export default function MeetingDetailPage() {
               onClick={() => setIsEditOpen(true)}
               title="Edit meeting"
               suppressHydrationWarning
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#8b8ba3] hover:text-white bg-[#1a1e36] hover:bg-[#252b4d] border border-[#2b3259] transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-all cursor-pointer"
             >
               <Edit size={13} />
               <span className="hidden sm:inline">Edit</span>
@@ -190,7 +190,7 @@ export default function MeetingDetailPage() {
               onClick={() => setIsDeleteOpen(true)}
               title="Delete meeting"
               suppressHydrationWarning
-              className="p-1.5 rounded-lg text-red-400 hover:text-white hover:bg-red-500/20 border border-red-500/20 transition-all"
+              className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 border border-rose-200 transition-all cursor-pointer"
             >
               <Trash2 size={14} />
             </button>
@@ -199,9 +199,9 @@ export default function MeetingDetailPage() {
 
         {/* Title and Metadata */}
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">{meeting.title}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2 tracking-tight">{meeting.title}</h1>
 
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#8b8ba3]">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500">
             <span className="flex items-center gap-1.5">
               <Calendar size={13} className="text-[#6C5CE7]" />
               {formatDate(meeting.date)} at {formatTime(meeting.date)}
@@ -217,12 +217,12 @@ export default function MeetingDetailPage() {
           </div>
 
           {/* Attendees Chips & Tags */}
-          <div className="flex flex-wrap items-center justify-between gap-2 mt-3.5 pt-3 border-t border-[#1e233d]">
+          <div className="flex flex-wrap items-center justify-between gap-2 mt-3.5 pt-3 border-t border-slate-100">
             <div className="flex flex-wrap items-center gap-2">
               {participantsList.map((p, i) => (
                 <div
                   key={p.id}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#181c33] border border-[#293054] text-xs text-[#d0d3e6]"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-xs text-slate-700"
                 >
                   <div
                     className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[8px] font-bold"
@@ -237,7 +237,7 @@ export default function MeetingDetailPage() {
 
             <div className="flex items-center gap-1.5">
               {tagsList.map((tag) => (
-                <Badge key={tag.id} variant="outline" className="text-[10px] text-[#a29bfe] border-[#373f6b]">
+                <Badge key={tag.id} variant="outline" className="text-[10px] text-slate-600 border-slate-200 bg-slate-50">
                   #{tag.name}
                 </Badge>
               ))}
@@ -258,11 +258,11 @@ export default function MeetingDetailPage() {
         {/* Left Column: Interactive Transcript (7 cols) */}
         <div className="lg:col-span-7">
           <div className="mb-2 flex items-center justify-between px-1">
-            <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#6C5CE7]" />
               Interactive Transcript
             </h2>
-            <span className="text-xs text-[#8b8ba3]">
+            <span className="text-xs text-slate-500">
               Click any line to seek &amp; listen
             </span>
           </div>
@@ -271,16 +271,16 @@ export default function MeetingDetailPage() {
 
         {/* Right Column: AI Notebook, Action Items, AskFred (5 cols) */}
         <div className="lg:col-span-5">
-          <div className="bg-[#121526] rounded-xl border border-[#232845] h-[680px] flex flex-col shadow-lg overflow-hidden">
+          <div className="bg-white rounded-2xl border border-slate-200/80 h-[680px] flex flex-col shadow-xs overflow-hidden">
             {/* Tabs Header */}
-            <div className="flex border-b border-[#232845] bg-[#121526] p-1.5 gap-1.5 flex-shrink-0">
+            <div className="flex border-b border-slate-200/80 bg-slate-50/70 p-1.5 gap-1.5 flex-shrink-0">
               <button
                 onClick={() => setActiveTab('summary')}
                 suppressHydrationWarning
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   activeTab === 'summary'
-                    ? 'bg-[#6C5CE7] text-white shadow-md border border-[#6C5CE7]'
-                    : 'bg-[#181d33] text-[#9ca3af] hover:text-white hover:bg-[#202644] border border-[#262c4a]'
+                    ? 'bg-white text-[#6C5CE7] shadow-xs border border-slate-200/80'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
                 }`}
               >
                 <Sparkles size={13} />
@@ -290,10 +290,10 @@ export default function MeetingDetailPage() {
               <button
                 onClick={() => setActiveTab('actions')}
                 suppressHydrationWarning
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   activeTab === 'actions'
-                    ? 'bg-[#6C5CE7] text-white shadow-md border border-[#6C5CE7]'
-                    : 'bg-[#181d33] text-[#9ca3af] hover:text-white hover:bg-[#202644] border border-[#262c4a]'
+                    ? 'bg-white text-[#6C5CE7] shadow-xs border border-slate-200/80'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
                 }`}
               >
                 <CheckSquare size={13} />
@@ -303,10 +303,10 @@ export default function MeetingDetailPage() {
               <button
                 onClick={() => setActiveTab('ask')}
                 suppressHydrationWarning
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   activeTab === 'ask'
-                    ? 'bg-[#6C5CE7] text-white shadow-md border border-[#6C5CE7]'
-                    : 'bg-[#181d33] text-[#9ca3af] hover:text-white hover:bg-[#202644] border border-[#262c4a]'
+                    ? 'bg-white text-[#6C5CE7] shadow-xs border border-slate-200/80'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
                 }`}
               >
                 <Bot size={13} />
