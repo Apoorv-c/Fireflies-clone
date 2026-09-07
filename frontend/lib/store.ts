@@ -20,10 +20,11 @@ interface UIState {
   isUpgradeModalOpen: boolean;
   upgradeModalFeature: string;
   isPremium: boolean;
+  createModalInitialTab: 'schedule' | 'upload';
   setSearchQuery: (query: string) => void;
   setTranscriptSearchQuery: (query: string) => void;
   setSidebarOpen: (open: boolean) => void;
-  setIsCreateModalOpen: (open: boolean) => void;
+  setIsCreateModalOpen: (open: boolean, initialTab?: 'schedule' | 'upload') => void;
   setIsLiveCaptureOpen: (open: boolean) => void;
   setIsUpgradeModalOpen: (open: boolean) => void;
   setUpgradeModalFeature: (feature: string) => void;
@@ -50,10 +51,14 @@ export const useUIStore = create<UIState>((set) => ({
   isUpgradeModalOpen: false,
   upgradeModalFeature: 'Live Capture',
   isPremium: false,
+  createModalInitialTab: 'schedule',
   setSearchQuery: (query) => set({ searchQuery: query }),
   setTranscriptSearchQuery: (query) => set({ transcriptSearchQuery: query }),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
-  setIsCreateModalOpen: (open) => set({ isCreateModalOpen: open }),
+  setIsCreateModalOpen: (open, initialTab) => set({
+    isCreateModalOpen: open,
+    ...(initialTab ? { createModalInitialTab: initialTab } : {})
+  }),
   setIsLiveCaptureOpen: (open) => set({ isLiveCaptureOpen: open }),
   setIsUpgradeModalOpen: (open) => set({ isUpgradeModalOpen: open }),
   setUpgradeModalFeature: (feature) => set({ upgradeModalFeature: feature }),

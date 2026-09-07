@@ -72,7 +72,7 @@ export default function HomePage() {
           {/* Card 1: Schedule Meeting (Pink) */}
           <button
             type="button"
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => setIsCreateModalOpen(true, 'schedule')}
             suppressHydrationWarning
             className="flex items-center justify-between p-4 rounded-xl bg-[#fdf2f4] hover:bg-[#fde7eb] border border-[#fce7ea] transition-all text-left group cursor-pointer"
           >
@@ -90,7 +90,7 @@ export default function HomePage() {
           {/* Card 2: Upload File (Mint) */}
           <button
             type="button"
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => setIsCreateModalOpen(true, 'upload')}
             suppressHydrationWarning
             className="flex items-center justify-between p-4 rounded-xl bg-[#ecfdf5] hover:bg-[#d1fae5] border border-[#d1fae5] transition-all text-left group cursor-pointer"
           >
