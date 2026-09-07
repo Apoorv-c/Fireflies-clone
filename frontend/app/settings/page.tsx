@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
@@ -47,6 +47,12 @@ import { useToast } from '@/components/ui/Toast';
 export default function SettingsPage() {
   const router = useRouter();
   const { showToast } = useToast();
+
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Top banners & navigation state
   const [showTrialBanner, setShowTrialBanner] = useState(true);
@@ -199,8 +205,12 @@ export default function SettingsPage() {
     showToast('Referral link copied to clipboard!', 'success');
   };
 
+  if (!isMounted) {
+    return <div suppressHydrationWarning className="min-h-screen bg-[#fafbfc]" />;
+  }
+
   return (
-    <div className="min-h-screen bg-[#fafbfc] flex flex-col font-sans text-slate-800">
+    <div suppressHydrationWarning className="min-h-screen bg-[#fafbfc] flex flex-col font-sans text-slate-800">
       {/* 1. TOP TRIAL PROMO BANNER */}
       {showTrialBanner && (
         <div className="w-full bg-[#fbf9fe] border-b border-purple-100/70 px-4 py-2 flex items-center justify-between text-xs text-slate-700 select-none shadow-xs">

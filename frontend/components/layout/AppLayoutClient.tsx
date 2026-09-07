@@ -13,11 +13,11 @@ export default function AppLayoutClient({
   const isSettings = pathname === '/settings' || pathname.startsWith('/settings');
 
   return (
-    <div className="flex min-h-screen bg-[#ffffff]">
+    <div suppressHydrationWarning className="flex min-h-screen bg-[#ffffff]">
       {!isSettings && <Sidebar />}
-      <div className={`flex-1 ${isSettings ? 'ml-0' : 'ml-[56px]'} min-w-0 min-h-screen flex flex-col bg-[#ffffff]`}>
+      <div suppressHydrationWarning className={`flex-1 ${isSettings ? 'ml-0' : 'ml-[56px]'} min-w-0 min-h-screen flex flex-col bg-[#ffffff]`}>
         {!isSettings && <TopBar />}
-        <main className={`flex-1 ${isSettings ? 'p-0' : 'p-6 md:p-8'}`}>{children}</main>
+        <main suppressHydrationWarning className={`flex-1 ${isSettings ? 'p-0' : 'p-6 md:p-8'}`}>{children}</main>
       </div>
 
       {/* Floating Help / Support Button (Bottom Right) */}
