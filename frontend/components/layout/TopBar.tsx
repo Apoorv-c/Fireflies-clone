@@ -1,6 +1,7 @@
 'use client';
 
-import { Search, Bell, Video, ChevronDown } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Search, Bell, Video, ChevronDown, Sparkles, CheckSquare, Bot, ArrowRight } from 'lucide-react';
 import { useUIStore } from '@/lib/store';
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -8,6 +9,65 @@ export default function TopBar() {
   const { searchQuery, setSearchQuery, setIsCreateModalOpen } = useUIStore();
   const router = useRouter();
   const pathname = usePathname();
+
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      title: 'Q3 Product Roadmap Review',
+      desc: 'AI transcript and meeting summary are ready',
+      time: '15m ago',
+      unread: true,
+      href: '/meetings/1',
+      icon: Sparkles,
+      iconColor: 'text-[#6C5CE7] bg-purple-50',
+    },
+    {
+      id: 2,
+      title: 'Action Item Assigned',
+      desc: 'Review tiered API rate limiting structure',
+      time: '2h ago',
+      unread: true,
+      href: '/meetings/1',
+      icon: CheckSquare,
+      iconColor: 'text-emerald-600 bg-emerald-50',
+    },
+    {
+      id: 3,
+      title: 'Fred AI Assistant',
+      desc: 'Generated chapter timeline for Sprint Planning',
+      time: '1d ago',
+      unread: true,
+      href: '/meetings/2',
+      icon: Bot,
+      iconColor: 'text-blue-600 bg-blue-50',
+    },
+  ]);
+
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
+  const markAllAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+  };
+
+  const handleNotificationClick = (href: string, id: number) => {
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, unread: false } : n)));
+    setIsNotificationsOpen(false);
+    router.push(href);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setIsNotificationsOpen(false);
+      }
+    };
+    if (isNotificationsOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isNotificationsOpen]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,43 +114,102 @@ export default function TopBar() {
           </div>
         </form>
 
-        {/* Right Actions: Free meetings, Upgrade, Notifications, Capture */}
+        {/* Right Actions: Working Notifications Bell & Capture */}
         <div className="flex items-center gap-3">
-          {/* Free Meetings Counter */}
-          <div className="hidden md:flex items-center gap-1.5 text-xs text-slate-600 font-medium">
-            <span className="w-5 h-5 rounded bg-emerald-500 text-white flex items-center justify-center font-bold text-[11px] shadow-2xs">
-              3
-            </span>
-            <span>Free meetings</span>
+          {/* Notification Bell with Working Dropdown */}
+          <div className="relative" ref={notifRef}>
+            <button
+              type="button"
+              onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+              suppressHydrationWarning
+              className="relative p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+              title="Notifications"
+            >
+              <Bell size={18} />
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
+              )}
+            </button>
+
+            {/* Notifications Dropdown */}
+            {isNotificationsOpen && (
+              <div className="absolute right-0 mt-2 w-80 sm:w-92 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/70">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                      Notifications
+                    </span>
+                    {unreadCount > 0 && (
+                      <span className="bg-[#6C5CE7] text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </div>
+                  {unreadCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={markAllAsRead}
+                      className="text-[11px] text-[#6C5CE7] hover:underline font-medium cursor-pointer"
+                    >
+                      Mark all as read
+                    </button>
+                  )}
+                </div>
+
+                <div className="max-h-[340px] overflow-y-auto divide-y divide-slate-100">
+                  {notifications.map((n) => {
+                    const Icon = n.icon;
+                    return (
+                      <div
+                        key={n.id}
+                        onClick={() => handleNotificationClick(n.href, n.id)}
+                        className={`p-3.5 hover:bg-slate-50 transition-colors cursor-pointer flex items-start gap-3 ${
+                          n.unread ? 'bg-purple-50/20' : ''
+                        }`}
+                      >
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${n.iconColor}`}>
+                          <Icon size={15} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-1 mb-0.5">
+                            <p className={`text-xs font-semibold truncate ${n.unread ? 'text-slate-900' : 'text-slate-700'}`}>
+                              {n.title}
+                            </p>
+                            <span className="text-[10px] text-slate-400 whitespace-nowrap">{n.time}</span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 line-clamp-1">{n.desc}</p>
+                        </div>
+                        {n.unread && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#6C5CE7] mt-1.5 flex-shrink-0" />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="p-2.5 border-t border-slate-100 bg-slate-50/50 text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsNotificationsOpen(false);
+                      router.push('/meetings');
+                    }}
+                    className="text-xs text-[#6C5CE7] font-semibold hover:underline inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>View all meeting updates</span>
+                    <ArrowRight size={12} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-
-          {/* Upgrade Button */}
-          <button
-            type="button"
-            suppressHydrationWarning
-            onClick={() => router.push('/settings')}
-            className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 text-xs font-semibold transition-all active:scale-95"
-          >
-            Upgrade
-          </button>
-
-          {/* Notification Bell with Red Dot */}
-          <button
-            type="button"
-            suppressHydrationWarning
-            className="relative p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
-            title="Notifications"
-          >
-            <Bell size={18} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
-          </button>
 
           {/* Purple Capture Dropdown Button */}
           <button
             type="button"
             onClick={() => setIsCreateModalOpen(true)}
             suppressHydrationWarning
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#6C5CE7] hover:bg-[#5a4bd6] text-white text-xs font-semibold shadow-xs hover:shadow transition-all active:scale-95"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#6C5CE7] hover:bg-[#5a4bd6] text-white text-xs font-semibold shadow-xs hover:shadow transition-all active:scale-95 cursor-pointer"
           >
             <Video size={14} className="fill-current" />
             <span>Capture</span>
