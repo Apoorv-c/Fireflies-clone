@@ -24,7 +24,6 @@ import {
   ListOrdered,
   LayoutGrid,
   Bot,
-  Crown,
   Plus,
   Check,
   ExternalLink,
@@ -34,6 +33,7 @@ import {
   CheckCircle2,
   Calendar,
   Lock,
+  Unlock,
   Globe,
   Settings as SettingsIcon,
   HelpCircle,
@@ -43,6 +43,35 @@ import {
   Info
 } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
+
+// Fireflies Pro Crown Logo Component matching user uploaded media_1788807905606.png
+function ProCrownBadge({ onClick, className = '' }: { onClick?: () => void; className?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title="Pro Feature - Click to Unlock"
+      className={`inline-flex items-center justify-center w-5 h-5 rounded-[5px] bg-[#f4f0fd] hover:bg-purple-100 transition-colors flex-shrink-0 cursor-pointer ${className}`}
+    >
+      <svg
+        width="13"
+        height="11"
+        viewBox="0 0 13 11"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M1 9H12M1.5 7.2L1 1.8L4.5 4.5L6.5 1.2L8.5 4.5L12 1.8L11.5 7.2H1.5Z"
+          fill="#6C5CE7"
+          stroke="#6C5CE7"
+          strokeWidth="0.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
+  );
+}
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -70,7 +99,13 @@ export default function SettingsPage() {
     | 'account'
   >('recording');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isPlanTrial, setIsPlanTrial] = useState(false);
+
+  // Premium / Pro Plan State
+  const [isPremium, setIsPremium] = useState(false);
+  const [proFeatureContext, setProFeatureContext] = useState<{ title: string; desc: string }>({
+    title: 'Unlock Pro Features',
+    desc: 'Unlock meeting video recording, custom notetaker name, and automated retention policies.',
+  });
 
   // Settings values
   const [autoRecord, setAutoRecord] = useState(true);
@@ -125,7 +160,15 @@ export default function SettingsPage() {
     { name: 'Mike Johnson', email: 'mike@company.com', role: 'Member', status: 'Active' },
   ]);
 
+  const handleProFeatureClick = (title: string, desc: string) => {
+    if (!isPremium) {
+      setProFeatureContext({ title, desc });
+      setIsTrialModalOpen(true);
+    }
+  };
+
   const handleNameBlur = () => {
+    if (!isPremium) return;
     setIsNameSaved(true);
     showToast('Notetaker name updated successfully!', 'success');
     setTimeout(() => setIsNameSaved(false), 2000);
@@ -176,9 +219,14 @@ export default function SettingsPage() {
   };
 
   const handleStartTrial = () => {
-    setIsPlanTrial(true);
+    setIsPremium(true);
     setIsTrialModalOpen(false);
-    showToast('7-Day Business Plan Free Trial Activated! Enjoy unlimited transcripts.', 'success');
+    showToast('🎉 Premium Unlocked! 7-Day Business Plan Free Trial Activated. All Pro settings are now editable.', 'success');
+  };
+
+  const handleTogglePlan = () => {
+    setIsPremium(!isPremium);
+    showToast(isPremium ? 'Switched to Free Plan (Pro features locked)' : 'Switched to Premium Plan (Pro features unlocked)', 'info');
   };
 
   const handleSendFeedback = (e: React.FormEvent) => {
@@ -215,14 +263,28 @@ export default function SettingsPage() {
       {showTrialBanner && (
         <div className="w-full bg-[#fbf9fe] border-b border-purple-100/70 px-4 py-2 flex items-center justify-between text-xs text-slate-700 select-none shadow-xs">
           <div className="flex-1 text-center">
-            <span>You are eligible for 7 days business plan free trial. </span>
-            <button
-              type="button"
-              onClick={() => setIsTrialModalOpen(true)}
-              className="text-[#6C5CE7] hover:text-[#5a4bd6] font-semibold underline underline-offset-2 ml-1 cursor-pointer transition-colors inline-flex items-center gap-0.5"
-            >
-              Start free trial &rarr;
-            </button>
+            {isPremium ? (
+              <span className="text-emerald-700 font-medium">
+                🎉 <strong>Business Trial Active:</strong> All Pro crown features are unlocked and fully enabled.
+              </span>
+            ) : (
+              <>
+                <span>You are eligible for 7 days business plan free trial. </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProFeatureContext({
+                      title: 'Start 7-Day Business Trial',
+                      desc: 'Unlock meeting video recording, custom notetaker name, and automated retention policies.',
+                    });
+                    setIsTrialModalOpen(true);
+                  }}
+                  className="text-[#6C5CE7] hover:text-[#5a4bd6] font-semibold underline underline-offset-2 ml-1 cursor-pointer transition-colors inline-flex items-center gap-0.5"
+                >
+                  Start free trial &rarr;
+                </button>
+              </>
+            )}
           </div>
           <button
             type="button"
@@ -278,24 +340,30 @@ export default function SettingsPage() {
         {/* LEFT SETTINGS NAVIGATION SIDEBAR */}
         <aside className="w-60 flex-shrink-0 border-r border-slate-200/80 bg-white p-4 flex flex-col justify-between min-h-[calc(100vh-70px)]">
           <div>
-            {/* User Account / Workspace Dropdown */}
-            <div className="flex items-center justify-between p-1.5 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
+            {/* User Account / Workspace Dropdown with Plan Switcher */}
+            <div
+              onClick={handleTogglePlan}
+              title="Click to toggle between Free Plan and Premium Plan"
+              className="flex items-center justify-between p-1.5 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group border border-transparent hover:border-slate-200"
+            >
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-8 h-8 rounded-lg bg-[#6C5CE7] flex items-center justify-center text-white font-bold text-xs shadow-xs">
                   A
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-slate-800 truncate">apoorvverma.genaibu...</p>
-                  <p className="text-[11px] text-slate-400">
-                    {isPlanTrial ? (
-                      <span className="text-emerald-600 font-semibold">Business Trial</span>
+                  <p className="text-[11px] text-slate-400 flex items-center gap-1">
+                    {isPremium ? (
+                      <span className="text-emerald-600 font-semibold flex items-center gap-0.5">
+                        <CheckCircle2 size={10} /> Pro Plan
+                      </span>
                     ) : (
-                      'Free Plan'
+                      <span className="text-slate-400">Free Plan &middot; Click to test Pro</span>
                     )}
                   </p>
                 </div>
               </div>
-              <ChevronDown size={14} className="text-slate-400 flex-shrink-0 ml-1" />
+              <ChevronDown size={14} className="text-slate-400 flex-shrink-0 ml-1 group-hover:text-slate-600" />
             </div>
 
             {/* Segmented Control [ Personal | Team ] */}
@@ -454,7 +522,7 @@ export default function SettingsPage() {
               <section className="space-y-2">
                 <h3 className="text-xs font-medium text-slate-500">Recording</h3>
                 <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-xs space-y-6">
-                  {/* Auto-record meetings */}
+                  {/* Auto-record meetings (FREE FEATURE) */}
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3">
@@ -523,7 +591,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  {/* Capture meeting video */}
+                  {/* Capture meeting video (PRO FEATURE 👑 LOCKED ON FREE PLAN) */}
                   <div className="flex items-start justify-between pt-1">
                     <div className="flex items-start gap-3">
                       <div className="w-5 h-5 flex items-center justify-center text-slate-400 mt-0.5">
@@ -532,27 +600,46 @@ export default function SettingsPage() {
                       <div>
                         <div className="flex items-center gap-1.5">
                           <h4 className="text-xs font-semibold text-slate-900">Capture meeting video</h4>
-                          <span className="w-4 h-4 rounded bg-purple-100 text-[#6C5CE7] flex items-center justify-center">
-                            <Crown size={10} className="fill-[#6C5CE7]" />
-                          </span>
+                          <ProCrownBadge
+                            onClick={() =>
+                              handleProFeatureClick(
+                                'Capture Meeting Video (1080p)',
+                                'Record video along with meeting transcripts to review shared screens, slides, and webcam interactions.'
+                              )
+                            }
+                          />
+                          {!isPremium && (
+                            <span className="text-[10px] font-medium text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                              <Lock size={9} /> Pro Feature
+                            </span>
+                          )}
                         </div>
                         <p className="text-xs text-slate-400 mt-0.5">
                           Capture your meeting screen and shared content as video.
                         </p>
                       </div>
                     </div>
+                    {/* Toggle Switch: Locked if Free Plan, Click opens Trial Modal */}
                     <button
                       type="button"
                       role="switch"
-                      aria-checked={captureVideo}
+                      aria-checked={isPremium ? captureVideo : false}
                       onClick={() => {
-                        setCaptureVideo(!captureVideo);
-                        showToast(captureVideo ? 'Video capture disabled' : 'Video capture enabled (1080p)', 'info');
+                        if (!isPremium) {
+                          handleProFeatureClick(
+                            'Unlock Meeting Video Capture',
+                            'Capture meeting screen and shared presentations in 1080p HD video. Start your free trial to unlock.'
+                          );
+                        } else {
+                          setCaptureVideo(!captureVideo);
+                          showToast(captureVideo ? 'Video capture disabled' : 'Video capture enabled (1080p)', 'info');
+                        }
                       }}
+                      title={!isPremium ? 'Locked on Free Plan - Click to unlock' : 'Toggle Video Capture'}
                       style={{
                         width: '40px',
                         height: '22px',
-                        backgroundColor: captureVideo ? '#6C5CE7' : '#e2e8f0',
+                        backgroundColor: isPremium && captureVideo ? '#6C5CE7' : '#e2e8f0',
                         borderRadius: '9999px',
                         padding: '2px',
                         display: 'inline-flex',
@@ -560,6 +647,7 @@ export default function SettingsPage() {
                         cursor: 'pointer',
                         transition: 'background-color 0.2s',
                         border: 'none',
+                        opacity: !isPremium ? 0.75 : 1,
                       }}
                     >
                       <span
@@ -568,7 +656,7 @@ export default function SettingsPage() {
                           height: '18px',
                           backgroundColor: '#ffffff',
                           borderRadius: '9999px',
-                          transform: captureVideo ? 'translateX(18px)' : 'translateX(0px)',
+                          transform: isPremium && captureVideo ? 'translateX(18px)' : 'translateX(0px)',
                           transition: 'transform 0.2s ease-in-out',
                           boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
                         }}
@@ -576,7 +664,7 @@ export default function SettingsPage() {
                     </button>
                   </div>
 
-                  {/* Meeting language */}
+                  {/* Meeting language (FREE FEATURE) */}
                   <div className="space-y-3 pt-1">
                     <div className="flex items-start gap-3">
                       <div className="w-5 h-5 flex items-center justify-center text-slate-400 mt-0.5">
@@ -612,7 +700,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  {/* Auto-delete meetings */}
+                  {/* Auto-delete meetings (PRO FEATURE 👑 LOCKED ON FREE PLAN) */}
                   <div className="space-y-3 pt-1">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3">
@@ -622,27 +710,46 @@ export default function SettingsPage() {
                         <div>
                           <div className="flex items-center gap-1.5">
                             <h4 className="text-xs font-semibold text-slate-900">Auto-delete meetings</h4>
-                            <span className="w-4 h-4 rounded bg-purple-100 text-[#6C5CE7] flex items-center justify-center">
-                              <Crown size={10} className="fill-[#6C5CE7]" />
-                            </span>
+                            <ProCrownBadge
+                              onClick={() =>
+                                handleProFeatureClick(
+                                  'Auto-delete & Compliance Retention',
+                                  'Automatically delete meeting audio, transcripts, and video recordings after a specified retention window.'
+                                )
+                              }
+                            />
+                            {!isPremium && (
+                              <span className="text-[10px] font-medium text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                <Lock size={9} /> Pro Feature
+                              </span>
+                            )}
                           </div>
                           <p className="text-xs text-slate-400 mt-0.5">
                             Automatically delete meetings after a set retention period.
                           </p>
                         </div>
                       </div>
+                      {/* Toggle Switch: Locked if Free Plan */}
                       <button
                         type="button"
                         role="switch"
-                        aria-checked={autoDelete}
+                        aria-checked={isPremium ? autoDelete : false}
                         onClick={() => {
-                          setAutoDelete(!autoDelete);
-                          showToast(autoDelete ? 'Auto-delete disabled' : 'Auto-delete retention enabled', 'info');
+                          if (!isPremium) {
+                            handleProFeatureClick(
+                              'Unlock Auto-delete & Retention',
+                              'Enterprise retention rules are a Pro feature. Start your free trial to unlock automated cleanup.'
+                            );
+                          } else {
+                            setAutoDelete(!autoDelete);
+                            showToast(autoDelete ? 'Auto-delete disabled' : 'Auto-delete retention enabled', 'info');
+                          }
                         }}
+                        title={!isPremium ? 'Locked on Free Plan - Click to unlock' : 'Toggle Auto-delete'}
                         style={{
                           width: '40px',
                           height: '22px',
-                          backgroundColor: autoDelete ? '#6C5CE7' : '#e2e8f0',
+                          backgroundColor: isPremium && autoDelete ? '#6C5CE7' : '#e2e8f0',
                           borderRadius: '9999px',
                           padding: '2px',
                           display: 'inline-flex',
@@ -650,6 +757,7 @@ export default function SettingsPage() {
                           cursor: 'pointer',
                           transition: 'background-color 0.2s',
                           border: 'none',
+                          opacity: !isPremium ? 0.75 : 1,
                         }}
                       >
                         <span
@@ -658,14 +766,14 @@ export default function SettingsPage() {
                             height: '18px',
                             backgroundColor: '#ffffff',
                             borderRadius: '9999px',
-                            transform: autoDelete ? 'translateX(18px)' : 'translateX(0px)',
+                            transform: isPremium && autoDelete ? 'translateX(18px)' : 'translateX(0px)',
                             transition: 'transform 0.2s ease-in-out',
                             boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
                           }}
                         />
                       </button>
                     </div>
-                    {autoDelete && (
+                    {isPremium && autoDelete && (
                       <div className="relative pl-8">
                         <select
                           value={autoDeletePeriod}
@@ -869,7 +977,7 @@ export default function SettingsPage() {
                 </div>
               </section>
 
-              {/* 4. NOTETAKER PREFERENCE SECTION (Matches Image 4) */}
+              {/* 4. NOTETAKER PREFERENCE SECTION (PRO FEATURE 👑 LOCKED ON FREE PLAN) */}
               <section className="space-y-2">
                 <h3 className="text-xs font-medium text-slate-500">Notetaker Preference</h3>
                 <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-xs space-y-3">
@@ -880,9 +988,19 @@ export default function SettingsPage() {
                     <div>
                       <div className="flex items-center gap-1.5">
                         <h4 className="text-xs font-semibold text-slate-900">Notetaker name</h4>
-                        <span className="w-4 h-4 rounded bg-purple-100 text-[#6C5CE7] flex items-center justify-center">
-                          <Crown size={10} className="fill-[#6C5CE7]" />
-                        </span>
+                        <ProCrownBadge
+                          onClick={() =>
+                            handleProFeatureClick(
+                              'Custom Notetaker Name',
+                              'Personalize the name displayed when Fireflies bot joins Zoom, Google Meet, or Microsoft Teams.'
+                            )
+                          }
+                        />
+                        {!isPremium && (
+                          <span className="text-[10px] font-medium text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                            <Lock size={9} /> Pro Feature
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-slate-400 mt-0.5">
                         Your Fireflies bot will join meetings using this name. Applies to all future meetings.
@@ -893,14 +1011,42 @@ export default function SettingsPage() {
                     <input
                       type="text"
                       value={notetakerName}
+                      disabled={!isPremium}
                       onChange={(e) => setNotetakerName(e.target.value)}
                       onBlur={handleNameBlur}
-                      className="w-full px-3.5 py-2.5 bg-slate-50/60 focus:bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:border-[#6C5CE7] transition-all"
+                      onClick={() => {
+                        if (!isPremium) {
+                          handleProFeatureClick(
+                            'Custom Notetaker Name',
+                            'Personalize the name displayed when Fireflies bot joins your meetings. Start trial to unlock.'
+                          );
+                        }
+                      }}
+                      className={`w-full px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all ${
+                        isPremium
+                          ? 'bg-slate-50/60 focus:bg-white border border-slate-200 text-slate-800 focus:outline-none focus:border-[#6C5CE7]'
+                          : 'bg-slate-50/90 border border-slate-200/80 text-slate-500 cursor-pointer'
+                      }`}
                     />
-                    {isNameSaved && (
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600 flex items-center gap-1 text-[11px] font-semibold">
-                        <Check size={14} /> Saved
-                      </span>
+                    {!isPremium ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleProFeatureClick(
+                            'Custom Notetaker Name',
+                            'Personalize the name displayed when Fireflies bot joins your meetings. Start trial to unlock.'
+                          )
+                        }
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-purple-600 hover:text-purple-800 flex items-center gap-1 text-[11px] font-medium cursor-pointer"
+                      >
+                        <Lock size={12} /> Unlock
+                      </button>
+                    ) : (
+                      isNameSaved && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600 flex items-center gap-1 text-[11px] font-semibold">
+                          <Check size={14} /> Saved
+                        </span>
+                      )
                     )}
                   </div>
                 </div>
@@ -1203,13 +1349,20 @@ export default function SettingsPage() {
                       />
                     </div>
                   </div>
-                  <div className="pt-2">
+                  <div className="pt-2 flex items-center gap-3">
                     <button
                       type="button"
                       onClick={() => showToast('Profile details updated!', 'success')}
                       className="px-4 py-2 bg-[#6C5CE7] hover:bg-[#5a4bd6] text-white text-xs font-semibold rounded-lg cursor-pointer transition-colors shadow-xs"
                     >
                       Save Changes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleTogglePlan}
+                      className="px-3.5 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-lg cursor-pointer"
+                    >
+                      Current Plan: <strong>{isPremium ? 'Premium Plan' : 'Free Plan'}</strong> (Click to Toggle)
                     </button>
                   </div>
                 </div>
@@ -1283,7 +1436,7 @@ export default function SettingsPage() {
 
       {/* ================= MODALS ================= */}
 
-      {/* 1. TRIAL MODAL */}
+      {/* 1. TRIAL / UPGRADE PRO MODAL */}
       {isTrialModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative">
@@ -1295,18 +1448,39 @@ export default function SettingsPage() {
               <X size={18} />
             </button>
             <div className="w-12 h-12 rounded-xl bg-purple-100 text-[#6C5CE7] flex items-center justify-center mb-4">
-              <Crown size={24} />
+              <svg
+                width="24"
+                height="20"
+                viewBox="0 0 13 11"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M1 9H12M1.5 7.2L1 1.8L4.5 4.5L6.5 1.2L8.5 4.5L12 1.8L11.5 7.2H1.5Z"
+                  fill="#6C5CE7"
+                  stroke="#6C5CE7"
+                  strokeWidth="0.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </div>
-            <h3 className="text-lg font-bold text-slate-900">Start 7-Day Business Trial</h3>
-            <p className="text-xs text-slate-500 mt-1">Unlock all enterprise AI capabilities with zero upfront charge.</p>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-bold text-slate-900">{proFeatureContext.title}</h3>
+              <span className="text-[10px] font-bold text-[#6C5CE7] bg-purple-100 px-2 py-0.5 rounded-full">
+                PRO FEATURE
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-1">{proFeatureContext.desc}</p>
 
-            <div className="space-y-2.5 my-5">
+            <div className="space-y-2.5 my-5 bg-slate-50/60 p-3.5 rounded-xl border border-slate-100">
+              <p className="text-[11px] font-semibold text-slate-700 mb-1">What you get with Pro:</p>
               {[
+                'Capture meeting screen and video in 1080p HD',
+                'Custom notetaker name for Zoom, Meet, Teams',
+                'Automated meeting retention & deletion rules',
                 'Unlimited AI meeting transcripts & summaries',
-                'Screen & meeting video recording (1080p)',
-                'AskFred AI Copilot with unlimited prompt queries',
-                'Smart search across all past conversations',
-                'CRM integrations (Salesforce, HubSpot, Slack)'
+                'AskFred AI Copilot with unlimited queries'
               ].map((benefit, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs text-slate-700">
                   <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0" />
@@ -1321,14 +1495,15 @@ export default function SettingsPage() {
                 onClick={() => setIsTrialModalOpen(false)}
                 className="flex-1 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
               >
-                Cancel
+                Not Now
               </button>
               <button
                 type="button"
                 onClick={handleStartTrial}
-                className="flex-1 py-2 rounded-xl bg-[#6C5CE7] hover:bg-[#5a4bd6] text-white text-xs font-semibold shadow-sm cursor-pointer transition-colors"
+                className="flex-1 py-2 rounded-xl bg-[#6C5CE7] hover:bg-[#5a4bd6] text-white text-xs font-semibold shadow-sm cursor-pointer transition-colors flex items-center justify-center gap-1.5"
               >
-                Activate Free Trial
+                <Unlock size={14} />
+                <span>Unlock with Free Trial</span>
               </button>
             </div>
           </div>
@@ -1621,7 +1796,13 @@ export default function SettingsPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setIsTrialModalOpen(true)}
+                  onClick={() => {
+                    setProFeatureContext({
+                      title: 'Upgrade to Enterprise SSO',
+                      desc: 'Enable Okta, Google Workspace, and SAML Single Sign-On for your organization.',
+                    });
+                    setIsTrialModalOpen(true);
+                  }}
                   className="text-[11px] font-semibold text-[#6C5CE7] hover:underline cursor-pointer"
                 >
                   Upgrade
