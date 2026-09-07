@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, desc, asc
 from typing import List, Optional
+from datetime import datetime
 from app.database import get_db
 from app.models import Meeting, Participant, Tag
 from app.schemas.meeting import MeetingResponse, MeetingDetailResponse, MeetingCreate, MeetingUpdate
@@ -53,7 +54,7 @@ def get_meetings(
 def create_meeting(meeting: MeetingCreate, db: Session = Depends(get_db)):
     new_meeting = Meeting(
         title=meeting.title,
-        date=meeting.date,
+        date=meeting.date or datetime.utcnow(),
         duration_seconds=meeting.duration_seconds,
         status=meeting.status,
         audio_url=meeting.audio_url
@@ -70,6 +71,10 @@ def create_meeting(meeting: MeetingCreate, db: Session = Depends(get_db)):
         
     db.commit()
     db.refresh(new_meeting)
+
+    new_meeting.speaker_count = len(new_meeting.speakers)
+    new_meeting.segment_count = len(new_meeting.transcript_segments)
+    new_meeting.summary_snippet = None
     return new_meeting
 
 @router.get("/meetings/{id}", response_model=MeetingDetailResponse)

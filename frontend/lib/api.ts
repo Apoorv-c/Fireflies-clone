@@ -1,9 +1,35 @@
 import axios from 'axios';
 import type { Meeting, TranscriptSegment, Summary, ActionItem, Highlight, SearchResult } from '@/types';
 
+const getBaseURL = () => {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  if (typeof window !== 'undefined') {
+    // If running on a deployed domain (Railway, Render, custom host), use relative '' so Nginx/Next proxies /api
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      return '';
+    }
+    return 'http://localhost:8000';
+  }
+  return process.env.BACKEND_INTERNAL_URL || 'http://127.0.0.1:8000';
+};
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  baseURL: getBaseURL(),
   headers: { 'Content-Type': 'application/json' },
+});
+
+// Dynamic interceptor to ensure browser requests on deployed domains never mistakenly hit localhost
+api.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    if (process.env.NEXT_PUBLIC_API_URL) {
+      config.baseURL = process.env.NEXT_PUBLIC_API_URL;
+    } else if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      config.baseURL = '';
+    }
+  }
+  return config;
 });
 
 // Meetings

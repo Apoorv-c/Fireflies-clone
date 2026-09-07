@@ -179,13 +179,23 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
   // Submit Schedule Tab
   const onScheduleSubmit = async (data: MeetingFormData) => {
     try {
-      const validParticipants = participants.filter((p) => p.name.trim());
+      const validParticipants = participants
+        .filter((p) => p.name.trim())
+        .map((p) => ({ name: p.name.trim(), email: p.email.trim() || undefined }));
       const tags = data.tags ? data.tags.split(',').map((t) => t.trim()).filter(Boolean) : [];
 
+      let formattedDate = new Date().toISOString();
+      if (data.date) {
+        const parsed = new Date(data.date);
+        if (!isNaN(parsed.getTime())) {
+          formattedDate = parsed.toISOString();
+        }
+      }
+
       const meeting = await createMeeting.mutateAsync({
-        title: data.title,
-        date: new Date(data.date).toISOString(),
-        duration_seconds: Number(data.duration_minutes) * 60,
+        title: data.title.trim(),
+        date: formattedDate,
+        duration_seconds: Math.max(1, Number(data.duration_minutes) || 30) * 60,
         participants: validParticipants,
         tags,
       });
@@ -193,22 +203,20 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
       if (transcriptFile && meeting.id) {
         try {
           await uploadTranscript.mutateAsync({ meetingId: meeting.id, file: transcriptFile });
-          showToast('Meeting created with transcript file');
-        } catch {
-          showToast('Meeting created, but transcript parsing encountered an issue', 'error');
+        } catch (tErr) {
+          console.error('Transcript upload error:', tErr);
         }
       } else if (transcriptText.trim() && meeting.id) {
         const blob = new Blob([transcriptText], { type: 'text/plain' });
         const file = new File([blob], 'transcript.txt', { type: 'text/plain' });
         try {
           await uploadTranscript.mutateAsync({ meetingId: meeting.id, file });
-          showToast('Meeting created with pasted transcript');
-        } catch {
-          showToast('Meeting created, but transcript parsing encountered an issue', 'error');
+        } catch (tErr) {
+          console.error('Transcript paste error:', tErr);
         }
-      } else {
-        showToast('Meeting scheduled successfully', 'success');
       }
+
+      showToast(`🎉 "${meeting.title}" scheduled successfully!`, 'success');
 
       reset();
       setParticipants([{ name: '', email: '' }]);
@@ -216,9 +224,23 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
       setTranscriptText('');
       setTranscriptMode('none');
       onClose();
-    } catch {
-      showToast('Failed to create meeting. Ensure the backend is running.', 'error');
+
+      // Navigate to the newly created meeting notebook immediately so user sees it right away
+      if (meeting.id) {
+        router.push(`/meetings/${meeting.id}`);
+      }
+    } catch (err: any) {
+      console.error('Failed to create meeting:', err);
+      const detail = err?.response?.data?.detail;
+      const errorMsg = typeof detail === 'string' ? detail : (err?.message || 'Failed to create meeting. Ensure the backend is running.');
+      showToast(errorMsg, 'error');
     }
+  };
+
+  const onScheduleError = (formErrors: any) => {
+    const firstField = Object.keys(formErrors)[0];
+    const message = formErrors[firstField]?.message || 'Please fill in all required fields';
+    showToast(String(message), 'error');
   };
 
   return (
@@ -442,7 +464,7 @@ export default function CreateMeetingModal({ isOpen, onClose }: CreateMeetingMod
 
         {/* 2. SCHEDULE MEETING TAB */}
         {activeTab === 'schedule' && (
-          <form onSubmit={handleSubmit(onScheduleSubmit)} className="space-y-4 pt-1">
+          <form onSubmit={handleSubmit(onScheduleSubmit, onScheduleError)} className="space-y-4 pt-1">
             <Input
               label="Meeting Title *"
               placeholder="e.g. Q4 Strategy Review"
