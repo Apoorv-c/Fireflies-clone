@@ -119,7 +119,7 @@ export default function SettingsPage() {
   const [recapIncludes, setRecapIncludes] = useState('Overview');
   const [prepEmailRecipients, setPrepEmailRecipients] = useState('Send to all participants');
 
-  const [notetakerName, setNotetakerName] = useState('Fireflies.ai Notetaker Apoorv');
+  const [notetakerName, setNotetakerName] = useState('Fireflies.ai Notetaker Alex');
   const [isNameSaved, setIsNameSaved] = useState(false);
 
   // Rules lists
@@ -155,7 +155,7 @@ export default function SettingsPage() {
 
   // Team state
   const [teamMembers, setTeamMembers] = useState([
-    { name: 'Apoorv Verma', email: 'apoorvverma.genaibuilder@gmail.com', role: 'Owner', status: 'Active' },
+    { name: 'Alex Vance', email: 'alex.vance@company.com', role: 'Owner', status: 'Active' },
     { name: 'Sarah Chen', email: 'sarah@company.com', role: 'Member', status: 'Active' },
     { name: 'Mike Johnson', email: 'mike@company.com', role: 'Member', status: 'Active' },
   ]);
@@ -249,7 +249,7 @@ export default function SettingsPage() {
   };
 
   const copyReferralLink = () => {
-    navigator.clipboard.writeText('https://app.fireflies.ai/join?ref=apoorv-1024');
+    navigator.clipboard.writeText('https://app.fireflies.ai/join?ref=alex-1024');
     showToast('Referral link copied to clipboard!', 'success');
   };
 
@@ -351,7 +351,7 @@ export default function SettingsPage() {
                   A
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-slate-800 truncate">apoorvverma.genaibu...</p>
+                  <p className="text-xs font-medium text-slate-800 truncate">alex.vance@company...</p>
                   <p className="text-[11px] text-slate-400 flex items-center gap-1">
                     {isPremium ? (
                       <span className="text-emerald-600 font-semibold flex items-center gap-0.5">
@@ -1108,7 +1108,7 @@ export default function SettingsPage() {
                       <div className="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center text-red-500 font-bold text-sm">G</div>
                       <div>
                         <p className="text-xs font-semibold text-slate-900">Google Workspace (Gmail)</p>
-                        <p className="text-[11px] text-slate-400">apoorvverma.genaibuilder@gmail.com</p>
+                        <p className="text-[11px] text-slate-400">alex.vance@company.com</p>
                       </div>
                     </div>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[11px] font-semibold">Connected</span>
@@ -1335,7 +1335,7 @@ export default function SettingsPage() {
                       <label className="text-xs font-semibold text-slate-700">Full Name</label>
                       <input
                         type="text"
-                        defaultValue="Apoorv Verma"
+                        defaultValue="Alex Vance"
                         className="w-full mt-1.5 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800"
                       />
                     </div>
@@ -1344,7 +1344,7 @@ export default function SettingsPage() {
                       <input
                         type="email"
                         readOnly
-                        value="apoorvverma.genaibuilder@gmail.com"
+                        value="alex.vance@company.com"
                         className="w-full mt-1.5 px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-xs font-medium text-slate-500 cursor-not-allowed"
                       />
                     </div>
@@ -1719,7 +1719,7 @@ export default function SettingsPage() {
                 <input
                   type="text"
                   readOnly
-                  value="https://app.fireflies.ai/join?ref=apoorv-1024"
+                  value="https://app.fireflies.ai/join?ref=alex-1024"
                   className="flex-1 bg-white px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-mono text-slate-700"
                 />
                 <button
@@ -1769,7 +1769,7 @@ export default function SettingsPage() {
                   <CheckCircle2 size={18} className="text-emerald-600" />
                   <div>
                     <p className="text-xs font-semibold text-slate-900">Verified Email Domain</p>
-                    <p className="text-[11px] text-slate-500">apoorvverma.genaibuilder@gmail.com verified</p>
+                    <p className="text-[11px] text-slate-500">alex.vance@company.com verified</p>
                   </div>
                 </div>
                 <span className="text-[11px] font-semibold text-emerald-600">Passed</span>
