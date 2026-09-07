@@ -28,6 +28,7 @@ import {
   Check,
   ExternalLink,
   Users,
+  User,
   Copy,
   Star,
   CheckCircle2,
@@ -44,6 +45,8 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
 import { useUIStore } from '@/lib/store';
+import UserAvatar from '@/components/ui/UserAvatar';
+import AccountSettingsTab from '@/components/account/AccountSettingsTab';
 
 // Fireflies Pro Crown Logo Component matching user uploaded media_1788807905606.png
 function ProCrownBadge({ onClick, className = '' }: { onClick?: () => void; className?: string }) {
@@ -82,6 +85,13 @@ export default function SettingsPage() {
 
   useEffect(() => {
     setIsMounted(true);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      if (tabParam === 'account') {
+        setActiveTab('account');
+      }
+    }
   }, []);
 
   // Top banners & navigation state
@@ -98,11 +108,11 @@ export default function SettingsPage() {
     | 'mcp-api'
     | 'cookies'
     | 'account'
-  >('recording');
+  >('account');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Premium / Pro Plan State (Global Store)
-  const { isPremium, setIsPremium } = useUIStore();
+  const { isPremium, setIsPremium, userProfile } = useUIStore();
   const [proFeatureContext, setProFeatureContext] = useState<{ title: string; desc: string }>({
     title: 'Unlock Pro Features',
     desc: 'Unlock meeting video recording, custom notetaker name, and automated retention policies.',
@@ -343,23 +353,21 @@ export default function SettingsPage() {
           <div>
             {/* User Account / Workspace Dropdown with Plan Switcher */}
             <div
-              onClick={handleTogglePlan}
-              title="Click to toggle between Free Plan and Premium Plan"
+              onClick={() => setActiveTab('account')}
+              title="Click to manage Account & Profile"
               className="flex items-center justify-between p-1.5 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group border border-transparent hover:border-slate-200"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-[#6C5CE7] flex items-center justify-center text-white font-bold text-xs shadow-xs">
-                  A
-                </div>
+                <UserAvatar size="sm" showProBadge={true} />
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-slate-800 truncate">alex.vance@company...</p>
+                  <p className="text-xs font-medium text-slate-800 truncate">{userProfile.name}</p>
                   <p className="text-[11px] text-slate-400 flex items-center gap-1">
                     {isPremium ? (
                       <span className="text-emerald-600 font-semibold flex items-center gap-0.5">
                         <CheckCircle2 size={10} /> Pro Plan
                       </span>
                     ) : (
-                      <span className="text-slate-400">Free Plan &middot; Click to test Pro</span>
+                      <span className="text-slate-400">Free Plan</span>
                     )}
                   </p>
                 </div>
@@ -397,6 +405,7 @@ export default function SettingsPage() {
             {currentScope === 'personal' ? (
               <nav className="space-y-0.5">
                 {[
+                  { id: 'account', label: 'Account & Profile', icon: User },
                   { id: 'recording', label: 'Recording & Privacy', icon: Video },
                   { id: 'compliance', label: 'Compliance Notification', icon: Bell },
                   { id: 'email-assistant', label: 'Email Assistant', icon: Mail },
@@ -484,6 +493,11 @@ export default function SettingsPage() {
 
         {/* RIGHT SETTINGS CONTENT PANEL */}
         <main className="flex-1 p-6 md:p-8 overflow-y-auto max-w-4xl pb-32">
+          {/* TAB 0: ACCOUNT & PROFILE (Blank photo & Account section) */}
+          {activeTab === 'account' && (
+            <AccountSettingsTab />
+          )}
+
           {/* TAB 1: RECORDING & PRIVACY (Matches Demo Images 2, 3, 4) */}
           {activeTab === 'recording' && currentScope === 'personal' && (
             <div className="space-y-6">

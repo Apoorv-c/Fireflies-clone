@@ -1,7 +1,8 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Home,
   Bot,
@@ -13,10 +14,16 @@ import {
   Zap,
   UserPlus,
   Settings,
-  FolderTree
+  FolderTree,
+  User,
+  Camera,
+  Crown,
+  ChevronRight
 } from 'lucide-react';
 import { useUIStore } from '@/lib/store';
 import CreateMeetingModal from '@/components/meetings/CreateMeetingModal';
+import AccountModal from '@/components/account/AccountModal';
+import UserAvatar from '@/components/ui/UserAvatar';
 
 interface NavDockItem {
   href: string;
@@ -93,6 +100,10 @@ function ProCrownBadge({ className = "w-2.5 h-2.5" }: { className?: string }) {
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
+
   const {
     isCreateModalOpen,
     setIsCreateModalOpen,
@@ -100,20 +111,119 @@ export default function Sidebar() {
     setIsUpgradeModalOpen,
     setUpgradeModalFeature,
     setIsLiveCaptureOpen,
+    userProfile,
+    isAccountModalOpen,
+    setIsAccountModalOpen,
   } = useUIStore();
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(e.target as Node)) {
+        setIsAccountMenuOpen(false);
+      }
+    };
+    if (isAccountMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isAccountMenuOpen]);
 
   return (
     <>
       <aside suppressHydrationWarning className="fixed left-0 top-0 h-screen w-[56px] bg-white border-r border-slate-200/80 flex flex-col items-center py-3 z-50 select-none shadow-[1px_0_4px_rgba(0,0,0,0.02)]">
-        {/* Workspace Brand Avatar */}
-        <Link
-          href="/"
-          title="Workspace Home"
-          suppressHydrationWarning
-          className="w-8 h-8 rounded-lg bg-[#6C5CE7] hover:bg-[#5a4bd6] flex items-center justify-center text-white font-bold text-sm shadow-sm transition-all mb-4"
-        >
-          A
-        </Link>
+        {/* Workspace Brand / User Account Avatar */}
+        <div className="relative mb-4" ref={accountMenuRef}>
+          <button
+            type="button"
+            onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
+            title="Account & Profile"
+            suppressHydrationWarning
+            className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shadow-xs hover:ring-2 hover:ring-[#6C5CE7]/50 transition-all cursor-pointer group"
+          >
+            <UserAvatar size="md" showProBadge={true} />
+          </button>
+
+          {/* Quick Tooltip */}
+          {!isAccountMenuOpen && (
+            <span className="absolute left-[54px] top-1 px-2 py-1 bg-slate-900 text-white text-[11px] font-medium rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 z-50 shadow-md">
+              Account: {userProfile.name}
+            </span>
+          )}
+
+          {/* Account Flyout Menu */}
+          {isAccountMenuOpen && (
+            <div className="absolute left-[54px] top-0 w-64 bg-white rounded-2xl border border-slate-200 shadow-2xl z-50 overflow-hidden py-1.5 animate-in fade-in slide-in-from-left-2 duration-150">
+              <div className="px-3.5 py-2.5 border-b border-slate-100 flex items-center gap-3">
+                <UserAvatar size="md" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-slate-900 truncate">{userProfile.name}</p>
+                  <p className="text-[11px] text-slate-500 truncate">{userProfile.email}</p>
+                  <div className="mt-1">
+                    {isPremium ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#6C5CE7] bg-purple-50 px-1.5 py-0.5 rounded-full">
+                        <Crown size={9} /> Pro Plan
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-medium text-slate-400">Free Plan</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-1 space-y-0.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAccountMenuOpen(false);
+                    router.push('/settings?tab=account');
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer text-left"
+                >
+                  <User size={15} className="text-[#6C5CE7]" />
+                  <span>Account & Profile Settings</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAccountMenuOpen(false);
+                    setIsAccountModalOpen(true);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer text-left"
+                >
+                  <Camera size={15} className="text-slate-400" />
+                  <span>Change Profile Photo...</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAccountMenuOpen(false);
+                    router.push('/settings');
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer text-left"
+                >
+                  <Settings size={15} className="text-slate-400" />
+                  <span>Workspace Settings</span>
+                </button>
+              </div>
+
+              <div className="p-1 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAccountMenuOpen(false);
+                    setIsAccountModalOpen(true);
+                  }}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer text-left"
+                >
+                  <span>More Options</span>
+                  <ChevronRight size={13} className="text-slate-400" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Top Navigation Icons */}
         <nav suppressHydrationWarning className="flex-1 w-full flex flex-col items-center gap-1.5 px-2">
@@ -230,6 +340,7 @@ export default function Sidebar() {
       </aside>
 
       <CreateMeetingModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+      <AccountModal isOpen={isAccountModalOpen} onClose={() => setIsAccountModalOpen(false)} />
     </>
   );
 }

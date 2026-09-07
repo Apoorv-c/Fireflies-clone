@@ -11,6 +11,18 @@ interface PlayerState {
   setActiveSegmentId: (id: number | null) => void;
 }
 
+export interface UserProfile {
+  name: string;
+  email: string;
+  role: string;
+  company: string;
+  phone: string;
+  timezone: string;
+  language: string;
+  avatarUrl: string | null;
+  avatarType: 'photo' | 'initial' | 'blank' | 'blank-neutral';
+}
+
 interface UIState {
   searchQuery: string;
   transcriptSearchQuery: string;
@@ -18,17 +30,21 @@ interface UIState {
   isCreateModalOpen: boolean;
   isLiveCaptureOpen: boolean;
   isUpgradeModalOpen: boolean;
+  isAccountModalOpen: boolean;
   upgradeModalFeature: string;
   isPremium: boolean;
   createModalInitialTab: 'schedule' | 'upload';
+  userProfile: UserProfile;
   setSearchQuery: (query: string) => void;
   setTranscriptSearchQuery: (query: string) => void;
   setSidebarOpen: (open: boolean) => void;
   setIsCreateModalOpen: (open: boolean, initialTab?: 'schedule' | 'upload') => void;
   setIsLiveCaptureOpen: (open: boolean) => void;
   setIsUpgradeModalOpen: (open: boolean) => void;
+  setIsAccountModalOpen: (open: boolean) => void;
   setUpgradeModalFeature: (feature: string) => void;
   setIsPremium: (premium: boolean) => void;
+  setUserProfile: (profile: Partial<UserProfile>) => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set) => ({
@@ -49,9 +65,21 @@ export const useUIStore = create<UIState>((set) => ({
   isCreateModalOpen: false,
   isLiveCaptureOpen: false,
   isUpgradeModalOpen: false,
+  isAccountModalOpen: false,
   upgradeModalFeature: 'Live Capture',
   isPremium: false,
   createModalInitialTab: 'schedule',
+  userProfile: {
+    name: 'Alex Vance',
+    email: 'alex.vance@company.com',
+    role: 'Lead Product Architect',
+    company: 'Fireflies Workspace',
+    phone: '+1 (555) 234-5678',
+    timezone: 'UTC-05:00 (Eastern Time)',
+    language: 'English (US)',
+    avatarUrl: null,
+    avatarType: 'blank', // Default to blank photo as requested
+  },
   setSearchQuery: (query) => set({ searchQuery: query }),
   setTranscriptSearchQuery: (query) => set({ transcriptSearchQuery: query }),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
@@ -61,6 +89,10 @@ export const useUIStore = create<UIState>((set) => ({
   }),
   setIsLiveCaptureOpen: (open) => set({ isLiveCaptureOpen: open }),
   setIsUpgradeModalOpen: (open) => set({ isUpgradeModalOpen: open }),
+  setIsAccountModalOpen: (open) => set({ isAccountModalOpen: open }),
   setUpgradeModalFeature: (feature) => set({ upgradeModalFeature: feature }),
   setIsPremium: (premium) => set({ isPremium: premium }),
+  setUserProfile: (profile) => set((state) => ({
+    userProfile: { ...state.userProfile, ...profile }
+  })),
 }));

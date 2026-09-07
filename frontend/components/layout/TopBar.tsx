@@ -4,9 +4,10 @@ import { useState, useRef, useEffect } from 'react';
 import { Search, Bell, Video, ChevronDown, Sparkles, CheckSquare, Bot, ArrowRight } from 'lucide-react';
 import { useUIStore } from '@/lib/store';
 import { useRouter, usePathname } from 'next/navigation';
+import UserAvatar from '@/components/ui/UserAvatar';
 
 export default function TopBar() {
-  const { searchQuery, setSearchQuery, setIsCreateModalOpen } = useUIStore();
+  const { searchQuery, setSearchQuery, setIsCreateModalOpen, setIsAccountModalOpen } = useUIStore();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -214,6 +215,17 @@ export default function TopBar() {
             <Video size={14} className="fill-current" />
             <span>Capture</span>
             <ChevronDown size={13} className="opacity-80" />
+          </button>
+
+          {/* User Account Avatar Button */}
+          <button
+            type="button"
+            onClick={() => setIsAccountModalOpen(true)}
+            title="My Account"
+            suppressHydrationWarning
+            className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center hover:ring-2 hover:ring-[#6C5CE7]/40 transition-all cursor-pointer shadow-xs ml-1"
+          >
+            <UserAvatar size="sm" showProBadge={true} />
           </button>
         </div>
       </div>
