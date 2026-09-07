@@ -20,24 +20,41 @@ interface AudioPlayerProps {
 export default function AudioPlayer({ audioUrl, duration: meetingDuration, segments = [] }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const { currentTime, isPlaying, duration, activeSegmentId, setCurrentTime, setIsPlaying, setDuration, setActiveSegmentId } = usePlayerStore();
-  
+
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const [volume, setVolume] = useState<number>(0.9);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [voiceVoiceover, setVoiceVoiceover] = useState<boolean>(true);
   const [currentSpeaker, setCurrentSpeaker] = useState<string | null>(null);
 
+  // References to guarantee immediate, non-stale access across callbacks, timers, and utterances
+  const playbackRateRef = useRef<number>(1);
+  const volumeRef = useRef<number>(0.9);
+  const isMutedRef = useRef<boolean>(false);
+  const prevVolumeRef = useRef<number>(0.9);
+  const voiceVoiceoverRef = useRef<boolean>(true);
+
   // References for speech synthesis engine
   const currentSpeakingIndexRef = useRef<number | null>(null);
   const isSpeakingRef = useRef<boolean>(false);
   const keepAliveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const speechDelayTimerRef = useRef<NodeJS.Timeout | null>(null);
   const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
 
   // Sync total duration
   useEffect(() => {
     setDuration(meetingDuration);
   }, [meetingDuration, setDuration]);
+
+  // Sync native audio element properties whenever volume, muted or rate changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = isMuted ? 0 : volume;
+      audioRef.current.muted = isMuted;
+      audioRef.current.playbackRate = playbackRate;
+    }
+  }, [volume, isMuted, playbackRate]);
 
   // Load browser voices
   useEffect(() => {
@@ -67,11 +84,9 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
       return { voice: null, pitch: 1.0 };
     }
 
-    // Filter English voices if available, otherwise any
     const enVoices = voices.filter(v => v.lang.startsWith('en'));
     const pool = enVoices.length > 0 ? enVoices : voices;
 
-    // Hash speaker name into consistent index
     let hash = 0;
     for (let i = 0; i < speakerLabel.length; i++) {
       hash = (hash << 5) - hash + speakerLabel.charCodeAt(i);
@@ -80,14 +95,13 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
     const absHash = Math.abs(hash);
     const selectedVoice = pool[absHash % pool.length];
 
-    // Subtle pitch variations: 0.9 (deeper), 1.0 (neutral), 1.15 (lighter)
     const pitches = [0.95, 1.05, 0.9, 1.1, 1.0];
     const pitch = pitches[absHash % pitches.length];
 
     return { voice: selectedVoice, pitch };
   }, []);
 
-  // Clear running timers
+  // Clear running timers safely
   const clearTimers = useCallback(() => {
     if (progressTimerRef.current) {
       clearInterval(progressTimerRef.current);
@@ -97,14 +111,28 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
       clearInterval(keepAliveTimerRef.current);
       keepAliveTimerRef.current = null;
     }
+    if (speechDelayTimerRef.current) {
+      clearTimeout(speechDelayTimerRef.current);
+      speechDelayTimerRef.current = null;
+    }
   }, []);
 
   // Main speech synthesis trigger for a given segment index
-  const speakSegment = useCallback((index: number) => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+  const speakSegment = useCallback((
+    index: number,
+    options?: { rate?: number; volume?: number; isMuted?: boolean }
+  ) => {
+    if (typeof window === 'undefined') return;
+
+    const activeRate = options?.rate ?? playbackRateRef.current;
+    const activeVol = options?.volume ?? volumeRef.current;
+    const activeMuted = options?.isMuted ?? isMutedRef.current;
+    const activeVoiceover = voiceVoiceoverRef.current;
 
     clearTimers();
-    window.speechSynthesis.cancel();
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
 
     if (index < 0 || index >= segments.length) {
       setIsPlaying(false);
@@ -121,18 +149,21 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
     setCurrentTime(seg.start_time);
     setActiveSegmentId(seg.id);
 
-    // If user disabled voice voiceover or is muted, silently advance time
-    if (!voiceVoiceover || isMuted) {
-      const segDuration = Math.max(1, seg.end_time - seg.start_time);
+    // If voiceover is disabled, muted, or zero volume, advance time silently
+    if (!activeVoiceover || activeMuted || activeVol <= 0 || !window.speechSynthesis) {
       const startTime = Date.now();
 
       progressTimerRef.current = setInterval(() => {
-        const elapsed = (Date.now() - startTime) / 1000 * playbackRate;
+        // Read dynamic playbackRateRef to immediately adjust speed even in silent mode
+        const currentRate = playbackRateRef.current;
+        const elapsed = ((Date.now() - startTime) / 1000) * currentRate;
         const nextTime = seg.start_time + elapsed;
 
         if (nextTime >= seg.end_time) {
-          clearInterval(progressTimerRef.current!);
-          progressTimerRef.current = null;
+          if (progressTimerRef.current) {
+            clearInterval(progressTimerRef.current);
+            progressTimerRef.current = null;
+          }
           if (usePlayerStore.getState().isPlaying) {
             speakSegment(index + 1);
           }
@@ -143,71 +174,75 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
       return;
     }
 
-    const utterance = new SpeechSynthesisUtterance(seg.content);
-    utterance.rate = playbackRate;
-    utterance.volume = volume;
+    // Small delay ensures Chromium speech synthesizer flushes previous cancel operation cleanly
+    speechDelayTimerRef.current = setTimeout(() => {
+      if (!usePlayerStore.getState().isPlaying || !window.speechSynthesis) return;
 
-    const { voice, pitch } = getSpeakerVoiceSettings(seg.speaker_label || 'Speaker');
-    if (voice) utterance.voice = voice;
-    utterance.pitch = pitch;
+      const utterance = new SpeechSynthesisUtterance(seg.content);
+      utterance.rate = activeRate;
+      utterance.volume = Math.max(0, Math.min(1, activeVol));
 
-    // Smooth scrubber progress while speaking
-    const segDuration = Math.max(1, seg.end_time - seg.start_time);
-    let utteranceStartTime = Date.now();
+      const { voice, pitch } = getSpeakerVoiceSettings(seg.speaker_label || 'Speaker');
+      if (voice) utterance.voice = voice;
+      utterance.pitch = pitch;
 
-    utterance.onstart = () => {
-      utteranceStartTime = Date.now();
-      isSpeakingRef.current = true;
+      let utteranceStartTime = Date.now();
 
-      progressTimerRef.current = setInterval(() => {
-        const elapsed = (Date.now() - utteranceStartTime) / 1000 * playbackRate;
-        const progressTime = Math.min(seg.end_time, seg.start_time + elapsed);
-        setCurrentTime(progressTime);
-      }, 150);
+      utterance.onstart = () => {
+        utteranceStartTime = Date.now();
+        isSpeakingRef.current = true;
 
-      // Chrome 14-second pause bug workaround
-      keepAliveTimerRef.current = setInterval(() => {
-        if (typeof window !== 'undefined' && window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-          window.speechSynthesis.pause();
-          window.speechSynthesis.resume();
+        progressTimerRef.current = setInterval(() => {
+          // Dynamic calculation using playbackRateRef ensures speed changes are reflected instantly
+          const currentRate = playbackRateRef.current;
+          const elapsed = ((Date.now() - utteranceStartTime) / 1000) * currentRate;
+          const progressTime = Math.min(seg.end_time, seg.start_time + elapsed);
+          setCurrentTime(progressTime);
+        }, 120);
+
+        // Chrome 14-second pause bug workaround
+        keepAliveTimerRef.current = setInterval(() => {
+          if (typeof window !== 'undefined' && window.speechSynthesis && window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+            window.speechSynthesis.pause();
+            window.speechSynthesis.resume();
+          }
+        }, 9000);
+      };
+
+      utterance.onend = () => {
+        clearTimers();
+        isSpeakingRef.current = false;
+        setCurrentTime(seg.end_time);
+
+        if (usePlayerStore.getState().isPlaying) {
+          if (index + 1 < segments.length) {
+            setTimeout(() => {
+              if (usePlayerStore.getState().isPlaying) {
+                speakSegment(index + 1);
+              }
+            }, 50);
+          } else {
+            setIsPlaying(false);
+            setCurrentTime(0);
+            currentSpeakingIndexRef.current = null;
+            setCurrentSpeaker(null);
+          }
         }
-      }, 9000);
-    };
+      };
 
-    utterance.onend = () => {
-      clearTimers();
-      isSpeakingRef.current = false;
-      setCurrentTime(seg.end_time);
-
-      // Advance to next segment if still in playing mode
-      if (usePlayerStore.getState().isPlaying) {
-        if (index + 1 < segments.length) {
-          setTimeout(() => {
-            if (usePlayerStore.getState().isPlaying) {
-              speakSegment(index + 1);
-            }
-          }, 100);
-        } else {
-          setIsPlaying(false);
-          setCurrentTime(0);
-          currentSpeakingIndexRef.current = null;
-          setCurrentSpeaker(null);
+      utterance.onerror = (e) => {
+        clearTimers();
+        isSpeakingRef.current = false;
+        if (e.error !== 'canceled' && e.error !== 'interrupted') {
+          if (usePlayerStore.getState().isPlaying && index + 1 < segments.length) {
+            speakSegment(index + 1);
+          }
         }
-      }
-    };
+      };
 
-    utterance.onerror = (e) => {
-      clearTimers();
-      isSpeakingRef.current = false;
-      if (e.error !== 'canceled' && e.error !== 'interrupted') {
-        if (usePlayerStore.getState().isPlaying && index + 1 < segments.length) {
-          speakSegment(index + 1);
-        }
-      }
-    };
-
-    window.speechSynthesis.speak(utterance);
-  }, [segments, voiceVoiceover, isMuted, playbackRate, volume, getSpeakerVoiceSettings, clearTimers, setCurrentTime, setActiveSegmentId, setIsPlaying]);
+      window.speechSynthesis.speak(utterance);
+    }, 25);
+  }, [segments, getSpeakerVoiceSettings, clearTimers, setCurrentTime, setActiveSegmentId, setIsPlaying]);
 
   // Handle native audio element if real audio URL is available
   useEffect(() => {
@@ -229,7 +264,7 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
     };
   }, [audioUrl, setCurrentTime, setDuration, setIsPlaying]);
 
-  // React to isPlaying changes from store (both internal button clicks and external triggers)
+  // React to isPlaying changes from store
   useEffect(() => {
     if (audioUrl) {
       if (isPlaying) {
@@ -242,7 +277,6 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
 
     // TTS mode without audioUrl
     if (isPlaying) {
-      // Find matching segment index based on currentTime
       const current = usePlayerStore.getState().currentTime;
       let targetIdx = segments.findIndex(s => current >= s.start_time && current < s.end_time);
       if (targetIdx === -1) {
@@ -250,7 +284,6 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
       }
       if (targetIdx === -1) targetIdx = 0;
 
-      // If we are already speaking this segment, don't restart
       if (!isSpeakingRef.current || currentSpeakingIndexRef.current !== targetIdx) {
         speakSegment(targetIdx);
       }
@@ -265,14 +298,13 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
     }
   }, [isPlaying, audioUrl, segments, speakSegment, clearTimers]);
 
-  // React to seek or jump when already playing (e.g. user clicked another segment or chapter)
+  // React to seek or jump when already playing
   useEffect(() => {
     if (!isPlaying || audioUrl || segments.length === 0) return;
 
     const currentIdx = currentSpeakingIndexRef.current;
     if (currentIdx !== null && segments[currentIdx]) {
       const activeSeg = segments[currentIdx];
-      // If currentTime jumped outside current segment boundaries, switch segment immediately
       if (currentTime < activeSeg.start_time - 0.5 || currentTime >= activeSeg.end_time + 0.5) {
         let targetIdx = segments.findIndex(s => currentTime >= s.start_time && currentTime < s.end_time);
         if (targetIdx === -1) targetIdx = segments.findIndex(s => s.start_time >= currentTime);
@@ -293,7 +325,7 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
     };
   }, [clearTimers]);
 
-  // Play / Pause toggle button
+  // Play / Pause toggle
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
   };
@@ -316,35 +348,112 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
     handleSeek(currentTime + delta);
   };
 
+  // Immediate speed cycling: updates ref and state, and immediately re-triggers audio/TTS at new rate
   const cyclePlaybackRate = () => {
     const rates = [1, 1.25, 1.5, 2];
-    const nextRate = rates[(rates.indexOf(playbackRate) + 1) % rates.length];
+    const currentIndex = rates.indexOf(playbackRateRef.current);
+    const nextRate = rates[(currentIndex + 1) % rates.length];
+
+    playbackRateRef.current = nextRate;
     setPlaybackRate(nextRate);
+
     if (audioRef.current) {
       audioRef.current.playbackRate = nextRate;
     }
-    // If currently speaking in TTS, re-trigger current segment with new rate
+
     if (isPlaying && !audioUrl && currentSpeakingIndexRef.current !== null) {
-      speakSegment(currentSpeakingIndexRef.current);
+      speakSegment(currentSpeakingIndexRef.current, { rate: nextRate });
     }
   };
 
+  // Mute toggle: correctly mutes without freezing progress, and cleanly restores volume on unmute
   const toggleMute = () => {
-    const nextMuted = !isMuted;
-    setIsMuted(nextMuted);
-    if (audioRef.current) {
-      audioRef.current.muted = nextMuted;
+    if (isMuted) {
+      // Unmute: restore previous non-zero volume
+      const restoredVol = prevVolumeRef.current > 0 ? prevVolumeRef.current : 0.9;
+      isMutedRef.current = false;
+      volumeRef.current = restoredVol;
+      setIsMuted(false);
+      setVolume(restoredVol);
+
+      if (audioRef.current) {
+        audioRef.current.muted = false;
+        audioRef.current.volume = restoredVol;
+      }
+
+      if (isPlaying && !audioUrl && currentSpeakingIndexRef.current !== null) {
+        speakSegment(currentSpeakingIndexRef.current, { volume: restoredVol, isMuted: false });
+      }
+    } else {
+      // Mute: store current volume and silence
+      if (volume > 0) {
+        prevVolumeRef.current = volume;
+      }
+      isMutedRef.current = true;
+      setIsMuted(true);
+
+      if (audioRef.current) {
+        audioRef.current.muted = true;
+      }
+
+      if (isPlaying && !audioUrl && currentSpeakingIndexRef.current !== null) {
+        speakSegment(currentSpeakingIndexRef.current, { isMuted: true });
+      }
     }
-    if (nextMuted && typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-      isSpeakingRef.current = false;
-    } else if (!nextMuted && isPlaying && !audioUrl && currentSpeakingIndexRef.current !== null) {
-      speakSegment(currentSpeakingIndexRef.current);
+  };
+
+  // Volume slider handler: smoothly adjusts volume and un-mutes if volume dragged above 0
+  const handleVolumeChange = (newVol: number) => {
+    volumeRef.current = newVol;
+    setVolume(newVol);
+
+    if (newVol === 0) {
+      isMutedRef.current = true;
+      setIsMuted(true);
+
+      if (audioRef.current) {
+        audioRef.current.muted = true;
+        audioRef.current.volume = 0;
+      }
+
+      if (isPlaying && !audioUrl && currentSpeakingIndexRef.current !== null) {
+        speakSegment(currentSpeakingIndexRef.current, { volume: 0, isMuted: true });
+      }
+    } else {
+      const wasMuted = isMutedRef.current;
+      prevVolumeRef.current = newVol;
+      isMutedRef.current = false;
+      setIsMuted(false);
+
+      if (audioRef.current) {
+        audioRef.current.muted = false;
+        audioRef.current.volume = newVol;
+      }
+
+      if (wasMuted && isPlaying && !audioUrl && currentSpeakingIndexRef.current !== null) {
+        speakSegment(currentSpeakingIndexRef.current, { volume: newVol, isMuted: false });
+      }
+    }
+  };
+
+  const toggleVoiceover = () => {
+    const nextVal = !voiceVoiceover;
+    voiceVoiceoverRef.current = nextVal;
+    setVoiceVoiceover(nextVal);
+
+    if (isPlaying && !audioUrl && currentSpeakingIndexRef.current !== null) {
+      if (nextVal) {
+        speakSegment(currentSpeakingIndexRef.current, { isMuted: isMutedRef.current });
+      } else {
+        speakSegment(currentSpeakingIndexRef.current, { isMuted: true });
+      }
     }
   };
 
   const effectiveDuration = duration || meetingDuration || 1;
   const progress = Math.min(100, (currentTime / effectiveDuration) * 100);
+  const displayVol = isMuted ? 0 : volume;
+  const volPercent = Math.round(displayVol * 100);
 
   return (
     <div className="bg-white border border-slate-200/80 rounded-2xl p-4 mb-5 shadow-xs" suppressHydrationWarning>
@@ -380,6 +489,7 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
             value={currentTime}
             onChange={(e) => handleSeek(parseFloat(e.target.value))}
             suppressHydrationWarning
+            aria-label="Seek time slider"
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
         </div>
@@ -423,7 +533,7 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
         {/* Center: AI Voice Status Badge */}
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setVoiceVoiceover(!voiceVoiceover)}
+            onClick={toggleVoiceover}
             type="button"
             title="Toggle AI Voiceover Narration"
             suppressHydrationWarning
@@ -445,8 +555,8 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
             onClick={cyclePlaybackRate}
             type="button"
             suppressHydrationWarning
-            className="px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 hover:bg-slate-200/80 text-slate-700 transition-colors border border-slate-200 cursor-pointer"
-            title="Toggle playback speed"
+            className="px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 hover:bg-slate-200/80 text-slate-700 transition-colors border border-slate-200 cursor-pointer min-w-[38px] text-center"
+            title={`Current speed: ${playbackRate}x. Click to change.`}
           >
             {playbackRate}x
           </button>
@@ -458,32 +568,34 @@ export default function AudioPlayer({ audioUrl, duration: meetingDuration, segme
               type="button"
               suppressHydrationWarning
               className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
-              title={isMuted ? 'Unmute' : 'Mute'}
+              title={isMuted || volume === 0 ? 'Unmute' : 'Mute'}
             >
-              {isMuted ? (
+              {isMuted || volume === 0 ? (
                 <VolumeX size={17} className="text-rose-500" />
-              ) : volume > 0.5 ? (
-                <Volume2 size={17} />
+              ) : volume <= 0.4 ? (
+                <Volume1 size={17} className="text-slate-600" />
               ) : (
-                <Volume1 size={17} />
+                <Volume2 size={17} className="text-slate-700" />
               )}
             </button>
 
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.05"
-              value={isMuted ? 0 : volume}
-              onChange={(e) => {
-                const newVol = parseFloat(e.target.value);
-                setVolume(newVol);
-                if (isMuted && newVol > 0) setIsMuted(false);
-              }}
-              suppressHydrationWarning
-              className="w-16 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#6C5CE7]"
-              title={`Volume: ${Math.round((isMuted ? 0 : volume) * 100)}%`}
-            />
+            <div className="relative flex items-center">
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={displayVol}
+                onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                suppressHydrationWarning
+                aria-label="Volume level"
+                style={{
+                  background: `linear-gradient(to right, #6C5CE7 0%, #6C5CE7 ${volPercent}%, #e2e8f0 ${volPercent}%, #e2e8f0 100%)`
+                }}
+                className="w-18 h-1.5 rounded-lg appearance-none cursor-pointer accent-[#6C5CE7] transition-all"
+                title={`Volume: ${volPercent}%`}
+              />
+            </div>
           </div>
         </div>
       </div>
