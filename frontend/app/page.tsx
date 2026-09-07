@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useMeetings } from '@/hooks/useMeetings';
 import { useUIStore } from '@/lib/store';
+import MeetingSettingsModal from '@/components/meetings/MeetingSettingsModal';
 
 function formatMeetingDate(dateStr: string): string {
   const d = new Date(dateStr);
@@ -31,6 +32,7 @@ function formatMeetingDate(dateStr: string): string {
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'recent' | 'upcoming' | 'ai-feed'>('recent');
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const { data: meetings, isLoading } = useMeetings({ sort_by: 'newest' });
   const { setIsCreateModalOpen } = useUIStore();
 
@@ -146,13 +148,15 @@ export default function HomePage() {
           </div>
 
           {/* Settings button on the right */}
-          <Link
-            href="/settings"
-            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 transition-colors font-medium px-2 py-1 rounded-lg hover:bg-slate-100"
+          <button
+            type="button"
+            onClick={() => setIsSettingsModalOpen(true)}
+            suppressHydrationWarning
+            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 transition-colors font-medium px-2 py-1 rounded-lg hover:bg-slate-100 cursor-pointer"
           >
             <Settings size={14} />
             <span>Settings</span>
-          </Link>
+          </button>
         </div>
 
         {/* Meetings List */}
@@ -212,6 +216,12 @@ export default function HomePage() {
           </div>
         )}
       </section>
+
+      {/* Meeting Settings Modal */}
+      <MeetingSettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+      />
     </div>
   );
 }
