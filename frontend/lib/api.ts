@@ -12,6 +12,7 @@ export const getMeetings = async (params?: {
   sort_by?: string;
   date_from?: string;
   date_to?: string;
+  participant?: string;
   skip?: number;
   limit?: number;
 }): Promise<Meeting[]> => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, SortAsc } from 'lucide-react';
+import { Search, SortAsc, Users } from 'lucide-react';
 
 interface MeetingFiltersProps {
   search: string;
@@ -11,6 +11,8 @@ interface MeetingFiltersProps {
   onDateFromChange: (value: string) => void;
   dateTo: string;
   onDateToChange: (value: string) => void;
+  participant: string;
+  onParticipantChange: (value: string) => void;
 }
 
 const sortOptions = [
@@ -25,6 +27,7 @@ export default function MeetingFilters({
   sortBy, onSortChange,
   dateFrom, onDateFromChange,
   dateTo, onDateToChange,
+  participant, onParticipantChange,
 }: MeetingFiltersProps) {
   return (
     <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -36,6 +39,18 @@ export default function MeetingFilters({
           placeholder="Filter meetings..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
+          className="w-full pl-9 pr-4 py-2 bg-[#2a2a4a] border border-[#3a3a5a] rounded-lg text-sm text-[#e0e0e0] placeholder-[#6b6b8a] focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50 focus:border-[#6C5CE7] transition-all"
+        />
+      </div>
+
+      {/* Participant Filter */}
+      <div className="relative min-w-[160px]">
+        <Users size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6b6b8a]" />
+        <input
+          type="text"
+          placeholder="Participant..."
+          value={participant}
+          onChange={(e) => onParticipantChange(e.target.value)}
           className="w-full pl-9 pr-4 py-2 bg-[#2a2a4a] border border-[#3a3a5a] rounded-lg text-sm text-[#e0e0e0] placeholder-[#6b6b8a] focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/50 focus:border-[#6C5CE7] transition-all"
         />
       </div>

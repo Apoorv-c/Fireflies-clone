@@ -14,6 +14,7 @@ export default function MeetingsPage() {
   const [sortBy, setSortBy] = useState('newest');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [participant, setParticipant] = useState('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const { data: meetings, isLoading } = useMeetings({
@@ -21,6 +22,7 @@ export default function MeetingsPage() {
     sort_by: sortBy,
     date_from: dateFrom || undefined,
     date_to: dateTo || undefined,
+    participant: participant || undefined,
   });
 
   return (
@@ -51,6 +53,8 @@ export default function MeetingsPage() {
         onDateFromChange={setDateFrom}
         dateTo={dateTo}
         onDateToChange={setDateTo}
+        participant={participant}
+        onParticipantChange={setParticipant}
       />
 
       {/* Grid */}

@@ -8,6 +8,7 @@ export function useMeetings(params?: {
   sort_by?: string;
   date_from?: string;
   date_to?: string;
+  participant?: string;
 }) {
   return useQuery({
     queryKey: ['meetings', params],
